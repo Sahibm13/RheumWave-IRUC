@@ -634,7 +634,7 @@
     if (saved) { try { const u = JSON.parse(saved); startSession(u.type, u.id); } catch {} }
 
     // Re-read progress from localStorage when the tab regains focus (e.g. returning from a case tab)
-    window.addEventListener('focus', () => {
+window.addEventListener('focus', () => {
   const prev = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
   for (const caseId of Object.keys(prev)) {
     const newEntry = prev[caseId];
@@ -648,11 +648,19 @@
 });
     // Also catch storage events from other tabs writing directly to localStorage
     window.addEventListener('storage', e => {
-      if (e.key === PROGRESS_KEY) {
-        progress = JSON.parse(e.newValue || '{}');
-        renderCases();
+  if (e.key === PROGRESS_KEY) {
+    const prev = JSON.parse(e.newValue || '{}');
+    for (const caseId of Object.keys(prev)) {
+      const newEntry = prev[caseId];
+      const oldEntry = progress[caseId];
+      if (newEntry && newEntry.attempts > (oldEntry ? oldEntry.attempts : 0)) {
+        pushScore(caseId, newEntry.lastScore, newEntry.attempts);
       }
-    });
+    }
+    progress = prev;
+    renderCases();
+  }
+});
   </script>
 </body>
 </html>
