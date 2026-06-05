@@ -452,7 +452,6 @@
 
     async function pushScore(caseId, score, attempt) {
       if (!currentUser || currentUser.type !== 'participant') return;
-      console.log('pushing score', participant_id, case_id, score);
       try {
         await supabaseReq('/case_scores', 'POST', {
           participant_id: currentUser.id,
@@ -635,9 +634,17 @@
 
     // Re-read progress from localStorage when the tab regains focus (e.g. returning from a case tab)
     window.addEventListener('focus', () => {
-      progress = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
-      renderCases();
-    });
+  const prev = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
+  for (const caseId of Object.keys(prev)) {
+    const newEntry = prev[caseId];
+    const oldEntry = progress[caseId];
+    if (newEntry && newEntry.attempts > (oldEntry ? oldEntry.attempts : 0)) {
+      pushScore(caseId, newEntry.lastScore, newEntry.attempts);
+    }
+  }
+  progress = prev;
+  renderCases();
+});
     // Also catch storage events from other tabs writing directly to localStorage
     window.addEventListener('storage', e => {
       if (e.key === PROGRESS_KEY) {
