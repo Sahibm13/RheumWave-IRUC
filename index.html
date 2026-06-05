@@ -639,22 +639,9 @@
   renderCases();
 });    
     // Also catch storage events from other tabs writing directly to localStorage
-    window.addEventListener('storage', e => {
+   window.addEventListener('storage', e => {
   if (e.key === PROGRESS_KEY) {
-    const prev = JSON.parse(e.newValue || '{}');
-    for (const caseId of Object.keys(prev)) {
-      const newEntry = prev[caseId];
-      const oldEntry = progress[caseId];
-      if (newEntry && newEntry.attempts > (oldEntry ? oldEntry.attempts : 0)) {
-        const lockKey = 'rheumwave-pushed-' + caseId + '-' + newEntry.attempts;
-        if (!localStorage.getItem(lockKey)) {
-          localStorage.setItem(lockKey, '1');
-          pushScore(caseId, newEntry.lastScore, newEntry.attempts);
-          setTimeout(() => localStorage.removeItem(lockKey), 3000);
-        }
-      }
-    }
-    progress = prev;
+    progress = JSON.parse(e.newValue || '{}');
     renderCases();
   }
 });
