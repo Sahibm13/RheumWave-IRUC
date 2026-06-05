@@ -451,6 +451,7 @@
     }
 
     async function pushScore(caseId, score, attempt) {
+        console.log('pushScore called', caseId, score, attempt, currentUser);
       if (!currentUser || currentUser.type !== 'participant') return;
       try {
         await supabaseReq('/case_scores', 'POST', {
