@@ -609,6 +609,32 @@
 
   <script>
     const CASE_ID = 3;
+    const SUPABASE_URL  = 'https://tbgtdmzkpprvjdhlpznr.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiZ3RkbXprcHBydmpkaGxwem5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NzIzMjYsImV4cCI6MjA5NjI0ODMyNn0.nWwBX-wnUe89jESCmfdsm266WOKcYXNJ5rmduELxWJ0';
+    const USER_KEY = 'rheumwave-user';
+
+async function saveScoreToSupabase(score) {
+  try {
+    const user = JSON.parse(localStorage.getItem(USER_KEY) || '{}');
+    if (!user || user.type !== 'participant') return;
+    await fetch(`${SUPABASE_URL}/rest/v1/case_scores`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        participant_id: user.id,
+        case_id: String(CASE_ID),
+        score: score,
+        attempt: (JSON.parse(localStorage.getItem('rheumwave-progress') || '{}')?.[String(CASE_ID)]?.attempts || 1),
+        timestamp: new Date().toISOString()
+      })
+    });
+  } catch(e) {}
+}
     const TOTAL_Q = 4;
 
     // ── SINGLE SELECT ─────────────────────────────────────────────────────────
@@ -729,6 +755,7 @@
         progress[key].score = Math.max(progress[key].score, pct);
         progress[key].history.push({ score: pct, ts: Date.now() });
         localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+        saveScoreToSupabase(pct);
       } catch(e) {}
       try { window.opener.postMessage({ type: 'rheumwave-score', caseId: CASE_ID, score: pct }, '*'); } catch(e) {}
     }
