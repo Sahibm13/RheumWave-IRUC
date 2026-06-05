@@ -634,7 +634,7 @@
     if (saved) { try { const u = JSON.parse(saved); startSession(u.type, u.id); } catch {} }
 
     // Re-read progress from localStorage when the tab regains focus (e.g. returning from a case tab)
-window.addEventListener('focus', () => {
+    window.addEventListener('focus', () => {
   const prev = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
   for (const caseId of Object.keys(prev)) {
     const newEntry = prev[caseId];
