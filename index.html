@@ -650,6 +650,7 @@
         if (!localStorage.getItem(lockKey)) {
           localStorage.setItem(lockKey, '1');
           pushScore(caseId, newEntry.lastScore, newEntry.attempts);
+          setTimeout(() => localStorage.removeItem(lockKey), 3000);
         }
       }
     }
