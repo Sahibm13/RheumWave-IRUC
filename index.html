@@ -637,7 +637,8 @@
     window.addEventListener('focus', () => {
   progress = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
   renderCases();
-});    // Also catch storage events from other tabs writing directly to localStorage
+});    
+    // Also catch storage events from other tabs writing directly to localStorage
     window.addEventListener('storage', e => {
   if (e.key === PROGRESS_KEY) {
     const prev = JSON.parse(e.newValue || '{}');
