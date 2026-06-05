@@ -646,7 +646,10 @@
       const newEntry = prev[caseId];
       const oldEntry = progress[caseId];
       if (newEntry && newEntry.attempts > (oldEntry ? oldEntry.attempts : 0)) {
-        pushScore(caseId, newEntry.lastScore, newEntry.attempts);
+        const lockKey = `rheumwave-pushed-${caseId}-${newEntry.attempts}`;
+        if (!localStorage.getItem(lockKey)) {
+          localStorage.setItem(lockKey, '1');
+          pushScore(caseId, newEntry.lastScore, newEntry.attempts);
       }
     }
     progress = prev;
