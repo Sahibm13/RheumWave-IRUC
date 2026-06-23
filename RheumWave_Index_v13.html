@@ -385,8 +385,14 @@
       </select>
       <select id="pathology">
         <option value="">All Pathologies</option>
-        <option>Inflammatory Arthritis</option><option>Crystal Arthropathy</option>
-        <option>Osteoarthritis</option><option>Nerve Entrapment</option>
+        <option value="">Normal</option>
+        <option>Inflammatory Arthritis</option>
+        <option>Enthesitis</option>
+        <option>Tenosynovitis</option>
+        <option>Crystal Arthropathy</option>
+        <option>Osteoarthritis</option>
+        <option>Nerve Entrapment</option>
+        <option>Soft Tissue/Tendon</option>
         <option>Regional Pain Syndrome</option>
       </select>
       <select id="level">
@@ -422,11 +428,30 @@
 
     // ── CASES ───────────────────────────────────────────────────────────────
     const cases = [
-      {id:1,caseNo:1,title:'RA MCP Synovitis',    region:'Hand/Wrist', pathology:'Inflammatory Arthritis', level:'Core',     url:'cases/ra-mcp-synovitis.html'},
-      {id:2,caseNo:2,title:'Gout MTP Joint',      region:'Foot/Ankle', pathology:'Crystal Arthropathy',    level:'Core',     url:'cases/gout-mtp.html'},
-      {id:3,caseNo:3,title:'Gout in the Knee',    region:'Knee',       pathology:'Crystal Arthropathy',    level:'Intro',    url:'cases/case-gout-knee.html'},
-      {id:4,caseNo:4,title:'Carpal Tunnel Syndrome',region:'Hand/Wrist',pathology:'Nerve Entrapment',      level:'Advanced', url:'cases/carpal-tunnel.html'},
-      {id:5,caseNo:5,title:'Lateral Epicondylitis',region:'Elbow',     pathology:'Regional Pain Syndrome', level:'Core',     url:'cases/lateral-epicondylitis.html'},
+      {id:1.1,caseNo:1.1,title:'Pilot - RA MCP Synovitis',    region:'Hand/Wrist', pathology:'Inflammatory Arthritis', level:'Core',     url:'cases/pilot-1.html'},
+      {id:2.1,caseNo:2.1,title:'Pilot - Gout MTP Joint',      region:'Foot/Ankle', pathology:'Crystal Arthropathy',    level:'Core',     url:'cases/pilot-2.html'},
+      {id:3.1,caseNo:3.1,title:'Pilot - Gout in the Knee',    region:'Knee',       pathology:'Crystal Arthropathy',    level:'Intro',    url:'cases/case-gout-knee.html'},
+      
+      {id:1,caseNo:1,title:'Normal',                                   region:'Hand/Wrist',    pathology:'Normal',                    level:'Intro',        url:'cases/normal.html'},
+      {id:2,caseNo:2,title:'Effusion in Feet (Normal)',                region:'Foot/Ankle',    pathology:'Normal',                    level:'Intro',        url:'cases/effusion-feet.html'},
+      {id:3,caseNo:3,title:'IA Synovitis - Hands & Wrist',             region:'Hand/Wrist',    pathology:'Inflammatory Arthritis',    level:'Core',         url:'cases/ia-synovitis-hands-wrist.html'},
+      {id:4,caseNo:4,title:'IA Synovitis - Hands & Wrist (II)',        region:'Hand/Wrist',    pathology:'Inflammatory Arthritis',    level:'Core',         url:'cases/ia-synovitis-hands-wrist-2.html'},
+      {id:5,caseNo:5,title:'IA Synovitis - Feet',                      region:'Foot/Ankle',    pathology:'Inflammatory Arthritis',    level:'Core',         url:'cases/ia-synovitis-feet.html'},
+      {id:6,caseNo:6,title:'IA Tenosynovitis (Hands)',                 region:'Hand/Wrist',    pathology:'Tenosynovitis',             level:'Core',         url:'cases/ia-tenosynovitis-hands.html'},
+      {id:7,caseNo:7,title:'Tenosynovitis (Ankles)',                   region:'Foot/Ankle',    pathology:'Tenosynovitis',             level:'Core',         url:'cases/tenosynovitis-ankles.html'},
+      {id:8,caseNo:8,title:'PsA Enthesitis',                           region:'Foot/Ankle',    pathology:'Enthesitis',                level:'Core',         url:'cases/psa-enthesitis.html'},
+      {id:9,caseNo:9,title:'PsA Enthesitis (II)',                      region:'Foot/Ankle',    pathology:'Enthesitis',                level:'Advanced',     url:'cases/psa-enthesitis-2.html'},
+      {id:10,caseNo:10,title:'Peritenonitis',                          region:'Foot/Ankle',    pathology:'Soft Tissue/Tendon',        level:'Advanced',     url:'cases/peritenonitis.html'},
+      {id:11,caseNo:11,title:'Gout - Classic Double Contour',          region:'Knee',          pathology:'Crystal Arthropathy',       level:'Core',         url:'cases/gout-double-contour.html'},
+      {id:12,caseNo:12,title:'Gout - Deposits vs PsA',                 region:'Hand/Wrist',    pathology:'Crystal Arthropathy',       level:'Advanced',     url:'cases/gout-vs-psa.html'},
+      {id:13,caseNo:13,title:'CPPD',                                   region:'Knee',          pathology:'Crystal Arthropathy',       level:'Core',         url:'cases/cppd.html'},
+      {id:14,caseNo:14,title:'Erosive OA - Hands with Doppler',        region:'Hand/Wrist',    pathology:'Osteoarthritis',            level:'Advanced',     url:'cases/erosive-oa-doppler.html'},
+      {id:15,caseNo:15,title:'OA Hands - Not all Doppler is IA',       region:'Hand/Wrist',    pathology:'Osteoarthritis',            level:'Advanced',     url:'cases/oa-hands-doppler.html'},
+      {id:16,caseNo:16,title:'OA MTP - vs Gout vs Both',               region:'Foot/Ankle',    pathology:'Osteoarthritis',            level:'Advanced',     url:'cases/oa-mtp.html'},
+      {id:17,caseNo:17,title:'Ethesopathy (Mechanical)',               region:'Foot/Ankle',    pathology:'Enthesitis',                level:'Core',         url:'cases/enthesopathy-mechanical.html'},
+      {id:18,caseNo:18,title:'Carpal Tunnel - MN vs Tenosynovitis',    region:'Hand/Wrist',    pathology:'Nerve Entrapment',          level:'Advanced',     url:'cases/carpal-tunnel.html'},
+      {id:19,caseNo:19,title:'Rotator Cuff Pathology',                 region:'Shoulder',      pathology:'Soft Tissue/Tendon',        level:'Core',         url:'cases/rotator-cuff.html'},
+      {id:20,caseNo:20,title:'Baker\'s Cyst',                          region:'Knee',          pathology:'Soft Tissue/Tendon',        level:'Intro',        url:'cases/bakers-cyst.html'},
     ];
 
     // ── SUPABASE ─────────────────────────────────────────────────────────────
