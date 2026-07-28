@@ -22,7 +22,7 @@
 
 const RHEUMWAVE_CASES = [
       {id:1,caseNo:1,title:'Normal',                                   region:'Hand/Wrist',    pathology:'Normal',                    level:'Intro',        url:'cases/case01.html', ready:true},
-      {id:2,caseNo:2,title:'Effusion in Feet (Normal)',                region:'Foot/Ankle',    pathology:'Normal',                    level:'Intro',        url:'cases/case02.html', ready:false},
+      {id:2,caseNo:2,title:'Effusion in Feet (Normal)',                region:'Foot/Ankle',    pathology:'Normal',                    level:'Intro',        url:'cases/case02.html', ready:true},
       {id:3,caseNo:3,title:'IA Synovitis - Hands & Wrist',             region:'Hand/Wrist',    pathology:'Inflammatory Arthritis',    level:'Core',         url:'cases/case03.html', ready:false},
       {id:4,caseNo:4,title:'IA Synovitis - Hands & Wrist (II)',        region:'Hand/Wrist',    pathology:'Inflammatory Arthritis',    level:'Core',         url:'cases/case04.html', ready:false},
       {id:5,caseNo:5,title:'IA Synovitis - Feet',                      region:'Foot/Ankle',    pathology:'Inflammatory Arthritis',    level:'Core',         url:'cases/case05.html', ready:false},
