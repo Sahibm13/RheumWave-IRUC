@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Backend title (do not surface to learner — reveals the final diagnosis): "Normal ultrasound findings and artefacts in psoriasis with arthralgia — no subclinical synovitis or enthesitis" -->
+  <title>Case 1 | RheumWave</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Shared stylesheet. Works whether this file sits in cases/ or next to index.html. -->
+  <script>
+    (function () {
+      var up = location.pathname.indexOf('/cases/') !== -1 ? '../' : '';
+      window.RW_UP = up;
+      document.write('<link rel="stylesheet" href="' + up + 'rheumwave-case.css">');
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       IMAGE CHECKLIST — 8 slots, all in images/ next to this file.
+       Every one is marked in the body with  <!== IMAGE n ==>  so you can
+       search for "IMAGE " and work down the list.
+
+         1  images/case1-wrist.png              Q1 stem      (3-panel wrist)
+         2  images/case1-wrist-annotated.png    Q1 answer explanation
+         3  images/case1-mcp-long.png           Q2 stem      (MCP long)
+         4  images/case1-flexor.png             Q2 stem      (flexor tendon)
+         5  images/case1-ankle-long.png         Q3 stem      (tibiotalar long)
+         6  images/case1-ankle-transverse.png   Q3 stem      (tibiotalar transverse)
+         7  images/case1-ankle-annotated.png    Q3 answer explanation
+         8  images/case1-achilles.png           Q4 stem      (both Achilles, long)
+
+       Rename the files however you like — just keep src and alt in step.
+       The alt text becomes the lightbox caption, so it is written to be read.
+       ══════════════════════════════════════════════════════════════════════ -->
+
+  <header>
+    <div class="brand">
+      <a href="../index.html">
+        <h1>RheumWave</h1>
+        <span>Interactive Rheumatology Ultrasound Cases</span>
+      </a>
+    </div>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../cases.html">Cases</a>
+      <a href="../quiz.html">Quiz</a>
+      <a href="../about.html">About</a>
+      <a href="../contact.html">Contact</a>
+      <button class="theme-btn" id="themeToggle">🌙 Dark</button>
+    </nav>
+  </header>
+
+  <div class="container">
+
+    <!-- Case header. The number, region and level are overwritten at load time
+         from rheumwave-cases.js; what's typed here is only a fallback. -->
+    <div class="case-header">
+      <p class="case-num" id="caseNum">Case 1</p>
+      <h2 id="caseHeading" data-case-title="Normal ultrasound findings and artefacts in psoriasis with arthralgia">Case 1</h2>
+      <div class="case-meta">
+        <span class="tag tag-level"  id="tagLevel">Intro</span>
+        <span class="tag tag-region" id="tagRegion">Multiregion</span>
+        <!-- Pathology kept for the backend but hidden — it gives away the answer -->
+        <span class="tag tag-path" data-pathology="Normal &amp; Artefact" style="display:none;">Normal &amp; Artefact</span>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <span class="progress-label" id="progressLabel">Question 1 of 4</span>
+    </div>
+
+    <!-- ══ VIGNETTE ════════════════════════════════════════════════════════ -->
+    <div class="vignette pinned collapsed" id="vignette">
+      <div class="vignette-header">
+        <div style="flex:1;">
+          <p class="vignette-summary">Case Vignette</p>
+          <p class="vignette-lead">A <strong>48-year-old female</strong> with psoriasis, referred by dermatology for a year of intermittent arthralgias. <span style="color:var(--ink-3);">(Expand for full history &amp; exam.)</span></p>
+          <div class="vignette-full">
+            <p>A <strong>48-year-old female</strong> with psoriasis over the last year (BSA 2%) is referred by dermatology for assessment of intermittent arthralgias over the last year. Her psoriasis is treated with topicals only.</p>
+            <p>She describes intermittent episodes lasting 1–2 days of migratory pain affecting wrists, fingers, feet and Achilles/ankle. She has morning stiffness for 30 minutes, but also describes pain more after use or activity and at the end of the day. She does not endorse any overt clinical swelling or dactylitis. She has no back pain, and no history of uveitis or IBD.</p>
+            <p>On exam, her vitals are normal and BMI is elevated at 29. She has no swollen joints or dactylitis. There is mild tenderness over the wrists and right ankle but no swelling appreciated. She is also tender at the right Achilles insertion but no swelling. No other swollen or tender entheseal sites.</p>
+            <p>Bloodwork showed HLA-B27 positivity and a CRP of 7.2&nbsp;mg/L (normal &lt;5&nbsp;mg/L). X-rays were reported as normal.</p>
+            <p>You decide to do a focused bedside MSK ultrasound to assess for subclinical synovitis and enthesitis.</p>
+          </div>
+        </div>
+        <button class="vignette-toggle" id="vignetteToggle" onclick="toggleVignette()">Expand</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         QUESTIONS — 4, all single-select.
+         Numbering is stamped on at load time, so blocks can be reordered.
+         ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- ══ QUESTION 1 ══════════════════════════════════════════════════════ -->
+    <div class="step">
+
+      <!-- Images appear immediately before the question they belong to -->
+      <div class="step-images">
+        <h3>Bedside Ultrasound — Wrist</h3>
+        <div class="image-grid">
+          <!-- ══ IMAGE 1 ══ Q1 stem. Composite: the explanation refers to a
+               "middle image" and to a transverse view, so this slot expects
+               the multi-panel wrist figure (long / retinaculum / transverse). -->
+          <img src="images/case1-wrist.png"
+               alt="Wrist ultrasound — dorsal longitudinal and transverse views over the extensor compartment, radiocarpal and midcarpal joints"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+        </div>
+      </div>
+
+      <div class="question-block">
+        <div class="new-info" style="display:none;">
+          <span class="ni-label">New Information</span>
+          <p><!-- TODO: new info revealed at this question --></p>
+        </div>
+        <div class="q-header">
+          <span class="q-num">Q1</span>
+          <span class="q-text">You scan the wrist and see the following images. Which of the following is the most accurate interpretation?</span>
+        </div>
+
+        <div class="options">
+          <div class="option" data-val="a" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Tenosynovitis of extensor tendon of wrist</span>
+          </div>
+          <div class="option" data-val="b" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Erosion at the capitate</span>
+          </div>
+          <div class="option" data-val="c" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Normal</span>
+          </div>
+          <div class="option" data-val="d" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Effusion at the radiocarpal joint</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          <!-- ══ IMAGE 2 ══ Q1 answer explanation — the annotated/labelled
+               version of the wrist figure. Delete this block if you would
+               rather not show a second figure here. -->
+          <img src="images/case1-wrist-annotated.png"
+               alt="Annotated wrist ultrasound — extensor retinaculum, anisotropy of the extensor tendon, and the normal synovial recesses of the radiocarpal and midcarpal joints"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain; margin-bottom:14px;">
+
+          <p><strong>The extensor tendon.</strong> There is no tenosynovitis. The hypoechoic area in the middle image is the extensor retinaculum, which is often mistaken for tenosynovitis. On transverse there is mild anisotropy, as the tendon is not hyperechoic. You can separate pathology from artefact by tilting the probe: if the tendon changes from hyperechoic to hypoechoic, that suggests artefact, as pathology would not change. Tenosynovitis would appear as a hypoechoic — or anechoic, if fluid is also present — rim surrounding the tendon, with Doppler seen in two planes (long and transverse).</p>
+
+          <p><strong>The capitate.</strong> There is mild irregularity, but no clear cortical break in two planes to suggest erosion. This can be seen in normal individuals too.</p>
+
+          <p><strong>The joint recesses.</strong> The mild hypoechoic areas at the radiocarpal and midcarpal articulations can be seen in normal individuals, as this is the location of the synovial recesses of these joints. There is no clear synovitis or synovial hypertrophy in grey-scale, and no Doppler to suggest pathology.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ QUESTION 2 ══════════════════════════════════════════════════════ -->
+    <div class="step">
+
+      <!-- Images appear immediately before the question they belong to -->
+      <div class="step-images">
+        <h3>Bedside Ultrasound — Finger Joints</h3>
+        <div class="image-grid">
+          <!-- ══ IMAGE 3 ══ Q2 stem, first of two. -->
+          <img src="images/case1-mcp-long.png"
+               alt="Metacarpophalangeal joint — dorsal longitudinal and transverse grey-scale and power Doppler views"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          <!-- ══ IMAGE 4 ══ Q2 stem, second of two. -->
+          <img src="images/case1-flexor.png"
+               alt="Flexor tendon of the finger — volar longitudinal view showing the tendon dipping deeper distally"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+        </div>
+      </div>
+
+      <div class="question-block">
+        <div class="new-info" style="display:none;">
+          <span class="ni-label">New Information</span>
+          <p><!-- TODO: new info revealed at this question --></p>
+        </div>
+        <div class="q-header">
+          <span class="q-num">Q2</span>
+          <span class="q-text">The finger joints show the following images. Which of the following is the most accurate interpretation?</span>
+        </div>
+
+        <div class="options">
+          <div class="option" data-val="a" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Normal MCP and normal flexor tendon</span>
+          </div>
+          <div class="option" data-val="b" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Anisotropy of the flexor tendon and normal MCP</span>
+          </div>
+          <div class="option" data-val="c" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Tenosynovitis of the flexor tendon and normal MCP</span>
+          </div>
+          <div class="option" data-val="d" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Tenosynovitis of the flexor tendon with effusion of MCP joint</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          <p><strong>The MCP joint is normal.</strong> Even if one were to suspect slightly more hypoechoic echotexture in the synovium on the longitudinal grey-scale images, there is no power Doppler in the region, and no grey-scale or Doppler synovitis is seen on the transverse images. Pathology requires confirmation in two planes, which is not the case here. These MCP images were obtained in an individual with normal joints using a handheld device, and it is not uncommon to see slight echotexture variations. It is important to get used to normal variation between individuals — and with your own machine.</p>
+
+          <p><strong>The flexor tendon is hypoechoic to anechoic on the right side of the image (distally).</strong> This is because of anisotropy: the tendon dips deeper, so the ultrasound beam does not hit it perpendicularly and is deflected away from the probe. Anisotropy is often confused for tenosynovitis and leads to erroneous interpretation of pathology. You can differentiate by moving your probe (heel–toe, tilting): pathology does not change with probe angle, whereas artefact should shift from hypoechoic to hyperechoic.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ QUESTION 3 ══════════════════════════════════════════════════════ -->
+    <div class="step">
+
+      <!-- Images appear immediately before the question they belong to -->
+      <div class="step-images">
+        <h3>Bedside Ultrasound — Right Ankle (Tibiotalar)</h3>
+        <div class="image-grid">
+          <!-- ══ IMAGE 5 ══ Q3 stem, first of two. -->
+          <img src="images/case1-ankle-long.png"
+               alt="Right tibiotalar joint — anterior longitudinal view showing an anechoic region at the distal tibiotalar joint"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          <!-- ══ IMAGE 6 ══ Q3 stem, second of two. -->
+          <img src="images/case1-ankle-transverse.png"
+               alt="Right tibiotalar joint — anterior transverse view with power Doppler"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+        </div>
+      </div>
+
+      <div class="question-block">
+        <div class="new-info">
+          <span class="ni-label">New Information</span>
+          <p>The left ankle, which was non-tender, showed a normal ultrasound. The right ankle (tibiotalar) scan showed an anechoic region at the distal tibiotalar joint. There was no Doppler signal (images not available). The subtalar joint and the anterior, medial and lateral tendons were normal.</p>
+        </div>
+
+        <div class="q-header">
+          <span class="q-num">Q3</span>
+          <span class="q-text">Which of the following is the most correct interpretation?</span>
+        </div>
+
+        <div class="options">
+          <div class="option" data-val="a" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Gr 1 synovitis in grey-scale without PD signal</span>
+          </div>
+          <div class="option" data-val="b" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Gr 2 synovitis in grey-scale without PD signal</span>
+          </div>
+          <div class="option" data-val="c" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Moderate sized pathological effusion</span>
+          </div>
+          <div class="option" data-val="d" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Normal physiological effusion</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          <!-- ══ IMAGE 7 ══ Q3 answer explanation — annotated tibiotalar view. -->
+          <img src="images/case1-ankle-annotated.png"
+               alt="Annotated right tibiotalar joint — small anechoic physiological effusion at the distal recess, with no synovial hypertrophy and no Doppler signal"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain; margin-bottom:14px;">
+
+          <p>This is a normal joint with a physiological effusion, seen not uncommonly at the distal tibiotalar joint. It is not synovitis, as the region is anechoic — which indicates effusion or fluid rather than synovial hypertrophy — and there is no Doppler either. The effusion is small and physiological in this case.</p>
+
+          <p>Physiological effusion at this site can also be seen in individuals with degenerative pathology or an elevated BMI. To separate normal physiological findings from pathology, scan other areas of the ankle and interpret the findings in clinical context.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ QUESTION 4 ══════════════════════════════════════════════════════ -->
+    <div class="step">
+
+      <!-- Images appear immediately before the question they belong to -->
+      <div class="step-images">
+        <h3>Bedside Ultrasound — Achilles Tendons (Longitudinal)</h3>
+        <div class="image-grid">
+          <!-- ══ IMAGE 8 ══ Q4 stem. Longitudinal Achilles, both sides. -->
+          <img src="images/case1-achilles.png"
+               alt="Longitudinal Achilles tendon views — left and right insertions at the calcaneus"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+        </div>
+      </div>
+
+      <div class="question-block">
+        <div class="new-info">
+          <span class="ni-label">New Information</span>
+          <p>The right Achilles was tender on palpation at its insertion.</p>
+        </div>
+
+        <div class="q-header">
+          <span class="q-num">Q4</span>
+          <span class="q-text">The Achilles longitudinal scans show the following images. What is the most appropriate interpretation?</span>
+        </div>
+
+        <div class="options">
+          <div class="option" data-val="a" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Normal</span>
+          </div>
+          <div class="option" data-val="b" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Traction enthesophyte</span>
+          </div>
+          <div class="option" data-val="c" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Inflammatory enthesitis</span>
+          </div>
+          <div class="option" data-val="d" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Mechanical tendonitis</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          <p><strong>Defining inflammatory enthesitis.</strong> Diagnosing inflammatory enthesitis sonographically comprises inflammatory changes (hypoechogenicity, thickening, Doppler) and structural changes (erosions, enthesophytes and calcifications), which have to be close to or at the enthesis. The definition of "close to" is debated between OMERACT (within 2&nbsp;mm) and GRAPPA ("near the bone cortex") definitions. The diagnosis depends on a combination of these factors, with Doppler and erosions shown to be the most specific. At the single-enthesis level, the definition requires the presence of a power Doppler signal grade ≥2 near the bone cortex, in the presence of hypoechogenicity and/or thickening of the entheseal structure, and within the appropriate clinical context (Ribeiro A et al. <em>Arthritis Rheumatol</em>. 2025). A DUET score has also been developed to help diagnose inflammatory enthesitis at the patient level, although its external validation is pending (Eder L et al. <em>Arthritis Rheumatol</em>. 2025).</p>
+
+          <p><strong>In this case.</strong> The left Achilles is completely normal, as it has none of the abnormalities above. The right Achilles shows a moderate sized traction enthesophyte. There could be hypoechogenicity at the distal aspect of the tendon, but in reality that was anisotropy, as dynamic testing showed it becoming hyperechoic. However, there is no thickening, Doppler, erosion or calcification of the kind seen in inflammatory enthesitis. Therefore, even if hypoechogenicity were present, it would not meet the single-level definition above.</p>
+
+          <p><strong>Why not mechanical tendonitis?</strong> Tendonitis may look sonographically very similar to inflammatory enthesitis, with thickening, hypoechogenicity, Doppler and calcifications. However, it often involves a significant proportion of the proximal tendon, or is isolated proximally with no distal entheseal involvement. It would also be unusual to see erosions with mechanical tendonitis — so if erosions are present, that should make you suspect inflammatory enthesitis.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ NAVIGATION & RESULT (leave as-is in every case) ═════════════════ -->
+    <div class="step-nav" id="stepNav">
+      <span class="nav-warning" id="navWarning">Please answer the question before continuing.</span>
+      <button class="next-btn" id="nextBtn" onclick="nextStep()">Next →</button>
+    </div>
+
+    <div id="finalResult">
+      <div class="score-big" id="scoreBig">—</div>
+      <div class="score-label">Your score for this case</div>
+      <div class="final-explanation">
+        <strong>Summary:</strong> This focused scan is normal. Every finding that might have been called pathology is either an artefact or a normal variant: the extensor retinaculum masquerading as tenosynovitis, anisotropy of the extensor and flexor tendons, mild cortical irregularity at the capitate without a cortical break in two planes, the normal synovial recesses of the radiocarpal and midcarpal joints, a small physiological effusion at the distal tibiotalar joint, and a traction enthesophyte at the right Achilles insertion without any inflammatory features. Three habits carry this case: confirm every abnormality in two planes, use probe tilt or heel–toe to separate anisotropy from real hypoechogenicity, and hold sonographic findings against the definitions and the clinical picture before labelling them as disease. HLA-B27 positivity, a mildly raised CRP and tenderness on exam are not, by themselves, subclinical synovitis or enthesitis.
+      </div>
+      <button class="retry-btn" onclick="retryCase()">↻ Retry Case</button>
+      <button class="back-btn"  onclick="goBack()">← Back to Cases</button>
+    </div>
+
+  </div>
+
+  <footer>© <span id="year"></span> RheumWave — All rights reserved.</footer>
+  <div id="syncStatus"></div>
+
+  <div id="usLightbox" onclick="closeLightbox(event)">
+    <button id="usLightboxClose" onclick="closeLightbox(event)" aria-label="Close">&times;</button>
+    <img id="usLightboxImg" src="" alt="">
+    <div id="usLightboxCaption"></div>
+  </div>
+
+  <!-- ══ THE ONLY LINE TO CHANGE PER CASE ═══════════════════════════════════
+       Must match the id in rheumwave-cases.js. It is the key every score is
+       filed under, so never change it once a case has been attempted. -->
+  <script>window.RW_CASE_ID = 1;</script>
+
+  <script>
+    (function () {
+      var up = window.RW_UP || '';
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-config.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-cases.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-sync.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-case-engine.js"><\/scr' + 'ipt>');
+    })();
+  </script>
+
+</body>
+</html>
