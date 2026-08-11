@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Backend title (do not surface to learner — reveals the final diagnosis): "TODO — real diagnosis, never shown to the learner" -->
+  <title>Case NN | RheumWave</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Shared stylesheet. Works whether this file sits in cases/ or next to index.html. -->
+  <script>
+    (function () {
+      var up = location.pathname.indexOf('/cases/') !== -1 ? '../' : '';
+      window.RW_UP = up;
+      document.write('<link rel="stylesheet" href="' + up + 'rheumwave-case.css">');
+    })();
+  </script>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <a href="../index.html">
+        <h1>RheumWave</h1>
+        <span>Interactive Rheumatology Ultrasound Cases</span>
+      </a>
+    </div>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../cases.html">Cases</a>
+      <a href="../quiz.html">Quiz</a>
+      <a href="../about.html">About</a>
+      <a href="../contact.html">Contact</a>
+      <button class="theme-btn" id="themeToggle">🌙 Dark</button>
+    </nav>
+  </header>
+
+  <div class="container">
+
+    <!-- Case header. The number, region and level are overwritten at load time
+         from rheumwave-cases.js; what's typed here is only a fallback. -->
+    <div class="case-header">
+      <p class="case-num" id="caseNum">Case NN</p>
+      <h2 id="caseHeading" data-case-title="TODO — real diagnosis, never shown to the learner">Case NN</h2>
+      <div class="case-meta">
+        <span class="tag tag-level"  id="tagLevel">TODO</span>
+        <span class="tag tag-region" id="tagRegion">TODO</span>
+        <!-- Pathology kept for the backend but hidden — it gives away the answer -->
+        <span class="tag tag-path" data-pathology="TODO" style="display:none;">TODO</span>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <span class="progress-label" id="progressLabel">Question 1 of 4</span>
+    </div>
+
+    <!-- ══ VIGNETTE ════════════════════════════════════════════════════════ -->
+    <div class="vignette pinned collapsed" id="vignette">
+      <div class="vignette-header">
+        <div style="flex:1;">
+          <p class="vignette-summary">Case Vignette</p>
+          <p class="vignette-lead">TODO one-line hook: age, sex, presenting complaint. <span style="color:var(--ink-3);">(Expand for full history &amp; exam.)</span></p>
+          <div class="vignette-full">
+            <p>TODO — history of presenting complaint.</p>
+            <p>TODO — past medical history, medications, social history.</p>
+            <p>TODO — examination findings and vitals.</p>
+          </div>
+        </div>
+        <button class="vignette-toggle" id="vignetteToggle" onclick="toggleVignette()">Expand</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         QUESTIONS
+         Copy a block below for each question you want, in the order you
+         want them. Numbering is automatic — the "Q1" text and every
+         data-q attribute are stamped on at load time, so you can add,
+         delete or reorder whole <div class="step"> blocks freely.
+
+         SINGLE-select : options are  <div class="option" ...>
+         MULTI-select  : options are  <div class="option multi" ...>
+                         and add  <p class="q-instruction">Select all correct answers.</p>
+         Mark each option data-correct="true" or "false".
+         data-val just needs to be unique within its question (a, b, c, d).
+         ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- ── SINGLE-SELECT TEMPLATE ─────────────────────────────────────── -->
+    <div class="step">
+
+      <!-- OPTIONAL images for this question. Delete the whole block if none.
+           Any <img class="us-thumb"> opens in the lightbox automatically;
+           the alt text becomes the caption, so write it properly. -->
+      <div class="step-images">
+        <h3>TODO — image panel heading, e.g. "Bedside Ultrasound — Left Shoulder"</h3>
+        <div class="image-grid">
+          <img src="images/TODO.png" alt="TODO — probe position and view"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+        </div>
+      </div>
+
+      <div class="question-block">
+        <!-- OPTIONAL. Delete style="display:none" to show it. Change the label
+             to whatever fits: "New Information", "Investigation Results",
+             "Synovial Fluid Analysis", "On Review"... -->
+        <div class="new-info" style="display:none;">
+          <span class="ni-label">New Information</span>
+          <p>TODO — what the learner learns at this point.</p>
+        </div>
+
+        <div class="q-header">
+          <span class="q-num">Q1</span>
+          <span class="q-text">TODO — question text.</span>
+        </div>
+
+        <div class="options">
+          <div class="option" data-val="a" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">TODO — correct answer</span>
+          </div>
+          <div class="option" data-val="b" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">TODO — distractor</span>
+          </div>
+          <div class="option" data-val="c" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">TODO — distractor</span>
+          </div>
+          <div class="option" data-val="d" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">TODO — distractor</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          TODO — why the correct answer is correct. Shown only in review.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MULTI-SELECT TEMPLATE ──────────────────────────────────────── -->
+    <div class="step">
+      <div class="question-block">
+        <div class="new-info" style="display:none;">
+          <span class="ni-label">New Information</span>
+          <p>TODO — what the learner learns at this point.</p>
+        </div>
+
+        <div class="q-header">
+          <span class="q-num">Q2</span>
+          <span class="q-text">TODO — question text.</span>
+        </div>
+        <p class="q-instruction">Select all correct answers.</p>
+
+        <div class="options">
+          <div class="option multi" data-val="a" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">TODO — correct</span>
+          </div>
+          <div class="option multi" data-val="b" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">TODO — correct</span>
+          </div>
+          <div class="option multi" data-val="c" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">TODO — incorrect</span>
+          </div>
+          <div class="option multi" data-val="d" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">TODO — incorrect</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          <strong>TODO option a:</strong> why it counts.<br><br>
+          <strong>TODO option b:</strong> why it counts.<br><br>
+          <strong>TODO option c:</strong> why not.<br><br>
+          <strong>TODO option d:</strong> why not.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ NAVIGATION & RESULT (leave as-is in every case) ═════════════════ -->
+    <div class="step-nav" id="stepNav">
+      <span class="nav-warning" id="navWarning">Please answer the question before continuing.</span>
+      <button class="next-btn" id="nextBtn" onclick="nextStep()">Next →</button>
+    </div>
+
+    <div id="finalResult">
+      <div class="score-big" id="scoreBig">—</div>
+      <div class="score-label">Your score for this case</div>
+      <div class="final-explanation">
+        <strong>Summary:</strong> TODO — the teaching point, pulling the history, imaging and investigations together into the final diagnosis.
+      </div>
+      <button class="retry-btn" onclick="retryCase()">↻ Retry Case</button>
+      <button class="back-btn"  onclick="goBack()">← Back to Cases</button>
+    </div>
+
+  </div>
+
+  <footer>© <span id="year"></span> RheumWave — All rights reserved.</footer>
+  <div id="syncStatus"></div>
+
+  <div id="usLightbox" onclick="closeLightbox(event)">
+    <button id="usLightboxClose" onclick="closeLightbox(event)" aria-label="Close">&times;</button>
+    <img id="usLightboxImg" src="" alt="">
+    <div id="usLightboxCaption"></div>
+  </div>
+
+  <!-- ══ THE ONLY LINE TO CHANGE PER CASE ═══════════════════════════════════
+       Must match the id in rheumwave-cases.js. It is the key every score is
+       filed under, so never change it once a case has been attempted. -->
+  <script>window.RW_CASE_ID = 0;   // <-- SET THIS</script>
+
+  <script>
+    (function () {
+      var up = window.RW_UP || '';
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-config.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-cases.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-sync.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-case-engine.js"><\/scr' + 'ipt>');
+    })();
+  </script>
+
+</body>
+</html>
