@@ -16,13 +16,18 @@
      ready     true once the case page actually exists. false shows the card
                greyed out as "Coming soon" and leaves it out of the homepage
                counts. Omit the field entirely and it counts as ready.
+     developed optional. Year the case content was written or last reviewed.
+               Prints as a small line at the foot of the case page. Omit it
+               and that line stays hidden, so add it as each case is built.
+               Keep it quoted — it is display text and is never compared, so
+               '2026, revised 2027' is equally valid.
 
    Cases appear in the order listed below.
    ──────────────────────────────────────────────────────────────────────────── */
 
 const RHEUMWAVE_CASES = [
-      {id:1,caseNo:1,title:'Normal',                                   region:'Hand/Wrist',    pathology:'Normal',                    level:'Intro',        url:'cases/case01.html', ready:true},
-      {id:2,caseNo:2,title:'Effusion in Feet (Normal)',                region:'Foot/Ankle',    pathology:'Normal',                    level:'Intro',        url:'cases/case02.html', ready:true},
+      {id:1,caseNo:1,title:'Normal',                                   region:'Hand/Wrist',    pathology:'Normal',                    level:'Intro',        url:'cases/case01.html', ready:true,   developed:'June 2026',
+      {id:2,caseNo:2,title:'Effusion in Feet (Normal)',                region:'Foot/Ankle',    pathology:'Normal',                    level:'Intro',        url:'cases/case02.html', ready:true,   developed:'June 2026'},
       {id:3,caseNo:3,title:'IA Synovitis - Hands & Wrist',             region:'Hand/Wrist',    pathology:'Inflammatory Arthritis',    level:'Core',         url:'cases/case03.html', ready:false},
       {id:4,caseNo:4,title:'IA Synovitis - Hands & Wrist (II)',        region:'Hand/Wrist',    pathology:'Inflammatory Arthritis',    level:'Core',         url:'cases/case04.html', ready:false},
       {id:5,caseNo:5,title:'IA Synovitis - Feet',                      region:'Foot/Ankle',    pathology:'Inflammatory Arthritis',    level:'Core',         url:'cases/case05.html', ready:false},
@@ -31,7 +36,7 @@ const RHEUMWAVE_CASES = [
       {id:8,caseNo:8,title:'PsA Enthesitis',                           region:'Foot/Ankle',    pathology:'Enthesitis',                level:'Core',         url:'cases/case08.html', ready:false},
       {id:9,caseNo:9,title:'PsA Enthesitis (II)',                      region:'Foot/Ankle',    pathology:'Enthesitis',                level:'Advanced',     url:'cases/case09.html', ready:false},
       {id:10,caseNo:10,title:'Peritenonitis',                          region:'Foot/Ankle',    pathology:'Soft Tissue/Tendon',        level:'Advanced',     url:'cases/case10.html', ready:false},
-      {id:11,caseNo:11,title:'Gout - Classic Double Contour',          region:'Knee',          pathology:'Crystal Arthropathy',       level:'Intro',        url:'cases/case11.html', ready:true },
+      {id:11,caseNo:11,title:'Gout - Classic Double Contour',          region:'Knee',          pathology:'Crystal Arthropathy',       level:'Intro',        url:'cases/case11.html', ready:true,   developed:'June 2026'},
       {id:12,caseNo:12,title:'Gout - Deposits vs PsA',                 region:'Hand/Wrist',    pathology:'Crystal Arthropathy',       level:'Advanced',     url:'cases/case12.html', ready:false},
       {id:13,caseNo:13,title:'CPPD',                                   region:'Knee',          pathology:'Crystal Arthropathy',       level:'Core',         url:'cases/case13.html', ready:false},
       {id:14,caseNo:14,title:'Erosive OA - Hands with Doppler',        region:'Hand/Wrist',    pathology:'Osteoarthritis',            level:'Advanced',     url:'cases/case14.html', ready:false},
