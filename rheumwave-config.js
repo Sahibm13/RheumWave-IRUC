@@ -40,7 +40,7 @@ const VALID_IDS     = ['RW-2026-001', 'RW-2026-002', 'RW-2026-003', 'RW-DEMO'];
                       have to be added to study_participants by hand.
    ──────────────────────────────────────────────────────────────────────────── */
 
-const ALLOW_GUEST          = true;    // ← the case library
+const ALLOW_GUEST          = false;    // ← the case library
 const ALLOW_GUEST_QUIZZES  = false;   // ← the quizzes; separate on purpose
 const ALLOW_SELF_REGISTER  = true;
 
