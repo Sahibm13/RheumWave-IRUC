@@ -569,3 +569,15 @@ footer { text-align: center; padding: 24px; color: var(--ink-3); font-size: .8re
 
 #saveStatus .save-contact { display: block; font-size: .8rem; opacity: .9; }
 #saveStatus .save-contact a { color: inherit; }
+
+/* Per-case provenance line. Sits at the foot of the case, below the result
+   panel and above the site footer. Populated by rheumwave-case-engine.js from
+   the `developed` field in rheumwave-cases.js; hidden when that field is absent. */
+.case-credit {
+  text-align: center;
+  font-size: .78rem;
+  color: var(--ink-3);
+  margin: 32px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
