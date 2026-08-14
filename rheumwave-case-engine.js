@@ -355,6 +355,15 @@ applyTheme();
   } else {
     console.warn(`RheumWave: CASE_ID ${CASE_ID} is not in rheumwave-cases.js.`);
   }
+
+   // Provenance line at the foot of the page. The <p> is hidden in the HTML and
+  // only revealed when the case entry carries a `developed` value, so a case
+  // without one shows nothing rather than placeholder text.
+  const credit = document.getElementById('caseCredit');
+  if (credit && entry && entry.developed) {
+    credit.textContent = `Case developed ${entry.developed} · RheumWave`;
+    credit.style.display = '';
+  }
 })();
 
 const yearEl = document.getElementById('year');
