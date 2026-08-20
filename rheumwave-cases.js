@@ -34,7 +34,7 @@ const RHEUMWAVE_CASES = [
       {id:6,caseNo:6,title:'IA Tenosynovitis (Hands)',                 region:'Hand/Wrist',    pathology:'Tenosynovitis',             level:'Core',         url:'cases/case06.html', ready:false},
       {id:7,caseNo:7,title:'Tenosynovitis (Ankles)',                   region:'Foot/Ankle',    pathology:'Tenosynovitis',             level:'Core',         url:'cases/case07.html', ready:false},
       {id:8,caseNo:8,title:'PsA Enthesitis',                           region:'Foot/Ankle',    pathology:'Enthesitis',                level:'Core',         url:'cases/case08.html', ready:false},
-      {id:9,caseNo:9,title:'PsA Enthesitis (II)',                      region:'Foot/Ankle',    pathology:'Enthesitis',                level:'Advanced',     url:'cases/case09.html', ready:true   developed:'2026'},
+      {id:9,caseNo:9,title:'PsA Enthesitis (II)',                      region:'Foot/Ankle',    pathology:'Enthesitis',                level:'Advanced',     url:'cases/case09.html', ready:true,  developed:'2026'},
       {id:10,caseNo:10,title:'Peritenonitis',                          region:'Foot/Ankle',    pathology:'Soft Tissue/Tendon',        level:'Advanced',     url:'cases/case10.html', ready:false},
       {id:11,caseNo:11,title:'Gout - Classic Double Contour',          region:'Knee',          pathology:'Crystal Arthropathy',       level:'Intro',        url:'cases/case11.html', ready:true,  developed:'2026'},
       {id:12,caseNo:12,title:'Gout - Deposits vs PsA',                 region:'Hand/Wrist',    pathology:'Crystal Arthropathy',       level:'Advanced',     url:'cases/case12.html', ready:false},
