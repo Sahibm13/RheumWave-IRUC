@@ -34,7 +34,7 @@ const RHEUMWAVE_CASES = [
       {id:6,caseNo:6,title:'IA Tenosynovitis (Hands)',                 region:'Hand/Wrist',    pathology:'Tenosynovitis',             level:'Core',         url:'cases/case06.html', ready:false},
       {id:7,caseNo:7,title:'Tenosynovitis (Ankles)',                   region:'Foot/Ankle',    pathology:'Tenosynovitis',             level:'Core',         url:'cases/case07.html', ready:false},
       {id:8,caseNo:8,title:'PsA Enthesitis',                           region:'Foot/Ankle',    pathology:'Enthesitis',                level:'Core',         url:'cases/case08.html', ready:false},
-      {id:9,caseNo:9,title:'PsA Enthesitis (II)',                      region:'Foot/Ankle',    pathology:'Enthesitis',                level:'Advanced',     url:'cases/case09.html', ready:true,  developed:'2026'},
+      {id:9,caseNo:9,title:'PsA Enthesitis (II)',                      region:'Hand/Wrist',    pathology:'Enthesitis',                level:'Advanced',     url:'cases/case09.html', ready:true,  developed:'2026'},
       {id:10,caseNo:10,title:'Peritenonitis',                          region:'Foot/Ankle',    pathology:'Soft Tissue/Tendon',        level:'Advanced',     url:'cases/case10.html', ready:false},
       {id:11,caseNo:11,title:'Gout - Classic Double Contour',          region:'Knee',          pathology:'Crystal Arthropathy',       level:'Intro',        url:'cases/case11.html', ready:true,  developed:'2026'},
       {id:12,caseNo:12,title:'Gout - Deposits vs PsA',                 region:'Hand/Wrist',    pathology:'Crystal Arthropathy',       level:'Advanced',     url:'cases/case12.html', ready:false},
@@ -44,7 +44,7 @@ const RHEUMWAVE_CASES = [
       {id:16,caseNo:16,title:'OA MTP - vs Gout vs Both',               region:'Foot/Ankle',    pathology:'Osteoarthritis',            level:'Advanced',     url:'cases/case16.html', ready:false},
       {id:17,caseNo:17,title:'Ethesopathy (Mechanical)',               region:'Foot/Ankle',    pathology:'Enthesitis',                level:'Core',         url:'cases/case17.html', ready:false},
       {id:18,caseNo:18,title:'Carpal Tunnel - MN vs Tenosynovitis',    region:'Hand/Wrist',    pathology:'Nerve Entrapment',          level:'Advanced',     url:'cases/case18.html', ready:false},
-      {id:19,caseNo:19,title:'Rotator Cuff Pathology',                 region:'Shoulder',      pathology:'Soft Tissue/Tendon',        level:'Core',         url:'cases/case19.html', ready:false},
+      {id:19,caseNo:19,title:'Rotator Cuff Pathology',                 region:'Shoulder',      pathology:'Soft Tissue/Tendon',        level:'Core',         url:'cases/case19.html', ready:true,  developed:'2026'},
       {id:20,caseNo:20,title:'Baker\'s Cyst',                          region:'Knee',          pathology:'Soft Tissue/Tendon',        level:'Intro',        url:'cases/case20.html', ready:false},
 ];
 
