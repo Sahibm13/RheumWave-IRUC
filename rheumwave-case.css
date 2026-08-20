@@ -285,6 +285,8 @@ nav a:hover { color: #fff; }
   color: #fff; font-size: .85rem; background: rgba(0,0,0,.5);
   padding: 6px 16px; border-radius: 16px; max-width: 90vw; text-align: center;
 }
+#usLightboxCaption:empty { display: none; }
+
 .image-slot {
   background: var(--surface-2);
   border-radius: 8px;
