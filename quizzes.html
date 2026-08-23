@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quizzes — RheumWave</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="rheumwave-theme.css">
+  <style>
+    /* Quiz-list-only styles.
+
+       This page carries no header and no footer navigation by design: a
+       participant part-way through the study should have nothing to wander off
+       to. It still loads rheumwave-theme.css, so the type, colours, cards and
+       buttons match the rest of the site exactly — only the chrome is absent.
+       rheumwave-chrome.css is deliberately NOT loaded here. */
+
+    /* ── INTRO OVERLAY ── */
+    #introOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,26,50,0.82);
+      backdrop-filter: blur(6px);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      animation: fadeIn .3s ease;
+    }
+    #introOverlay.hidden { display: none; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .intro-card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 38px 40px;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 0 28px 64px rgba(0,0,0,0.35);
+      animation: slideUp .35s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(18px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .intro-logo-wrap { display: flex; justify-content: center; margin-bottom: 22px; }
+    .intro-logo-wrap img {
+      width: 90px; height: 90px;
+      filter: drop-shadow(0 4px 10px rgba(30,58,95,0.2));
+    }
+
+    .intro-card h2 {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1.65rem;
+      font-weight: 600;
+      margin: 0 0 5px;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+    }
+    [data-theme="dark"] .intro-card h2 { color: #7bb3d4; }
+    .intro-card .subtitle { color: var(--ink-2); font-size: .88rem; margin: 0 0 26px; line-height: 1.55; }
+
+    .id-section label { display: block; font-weight: 500; font-size: .85rem; margin-bottom: 7px; }
+    .id-input-row { display: flex; gap: 8px; }
+    .id-input-row input {
+      flex: 1; padding: 9px 13px;
+      border: 1.5px solid var(--border-strong);
+      border-radius: 8px; font-size: .9rem;
+      background: var(--bg); color: var(--ink);
+      outline: none; transition: border-color .2s; font-family: inherit;
+    }
+    .id-input-row input:focus { border-color: var(--navy); }
+    .id-input-row input.error { border-color: #ef4444; }
+    .id-input-row button {
+      background: var(--navy); color: #fff; border: none;
+      padding: 9px 16px; border-radius: 8px; font-weight: 600;
+      font-size: .85rem; cursor: pointer; white-space: nowrap;
+      transition: opacity .2s; font-family: inherit;
+    }
+    .id-input-row button:hover { opacity: .85; }
+    .id-input-row button:disabled { opacity: .5; cursor: not-allowed; }
+
+    #idFeedback, #createFeedback { font-size: .8rem; margin-top: 6px; min-height: 17px; }
+    .ok  { color: var(--success); }
+    .err { color: #dc2626; }
+    .info { color: var(--ink-3); }
+
+    .divider { display: flex; align-items: center; gap: 11px; margin: 18px 0; color: var(--ink-3); font-size: .78rem; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .guest-btn {
+      width: 100%; padding: 9px; border: 1.5px solid var(--border-strong);
+      border-radius: 8px; background: transparent; color: var(--ink-2);
+      font-size: .88rem; cursor: pointer; transition: all .2s; font-family: inherit;
+    }
+    .guest-btn:hover { border-color: var(--navy); color: var(--ink); }
+
+    .intro-note {
+      margin-top: 16px; font-size: .75rem; color: var(--ink-3);
+      line-height: 1.55; border-top: 1px solid var(--border); padding-top: 13px;
+    }
+
+    /* ── CREATE-ID PANEL ── */
+    .intro-panel { display: none; }
+    .intro-panel.active { display: block; }
+
+    .switch-mode { margin-top: 14px; text-align: center; font-size: .8rem; color: var(--ink-3); }
+    .switch-mode button {
+      background: none; border: none; padding: 0; font: inherit;
+      color: var(--navy); font-weight: 600; cursor: pointer; text-decoration: underline;
+    }
+    [data-theme="dark"] .switch-mode button { color: #7bb3d4; }
+
+    .id-rules {
+      margin: 9px 0 0; padding: 10px 13px; font-size: .76rem; line-height: 1.6;
+      color: var(--ink-2); background: var(--surface-2);
+      border-radius: 8px; border: 1px solid var(--border);
+    }
+    .id-rules ul { margin: 5px 0 0; padding-left: 17px; }
+
+    .new-id-display {
+      margin: 4px 0 18px; padding: 18px; text-align: center;
+      background: var(--teal-light); border: 1.5px solid var(--navy);
+      border-radius: 10px;
+    }
+    .new-id-display .label {
+      font-size: .72rem; text-transform: uppercase; letter-spacing: .09em;
+      color: var(--ink-2); margin-bottom: 6px;
+    }
+    .new-id-display .value {
+      font-family: 'Source Serif 4', serif; font-size: 1.75rem; font-weight: 600;
+      color: var(--navy); letter-spacing: .04em; word-break: break-all;
+    }
+    [data-theme="dark"] .new-id-display .value { color: #9ecbe8; }
+
+    .ack-row { display: flex; gap: 10px; align-items: flex-start; font-size: .82rem; line-height: 1.5; }
+    .ack-row input { margin-top: 2px; width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
+    .ack-row label { cursor: pointer; color: var(--ink-2); }
+
+    .primary-btn {
+      width: 100%; margin-top: 16px; padding: 11px;
+      background: var(--navy); color: #fff; border: none; border-radius: 8px;
+      font-weight: 600; font-size: .9rem; cursor: pointer;
+      transition: opacity .2s; font-family: inherit;
+    }
+    .primary-btn:hover:not(:disabled) { opacity: .85; }
+    .primary-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ── PAGE ── */
+    /* No header, so the container carries its own top spacing and a plain
+       text link back to the rest of the site. */
+    .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px 24px; }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 26px;
+      font-size: .82rem;
+      color: var(--ink-3);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--heading); }
+
+    /* The one-line credit at the foot of the page. Not the site footer — this
+       page has no navigation by design. */
+    .page-credit {
+      text-align: center;
+      padding: 24px;
+      margin-top: 48px;
+      color: var(--ink-3);
+      font-size: .8rem;
+      border-top: 1px solid var(--border);
+    }
+
+    #floatingLogo {
+      position: fixed; bottom: 22px; right: 22px;
+      width: 90px; height: 90px; z-index: 200;
+      filter: drop-shadow(0 4px 14px rgba(30,58,95,0.35));
+      cursor: default; transition: transform .2s;
+    }
+    #floatingLogo:hover { transform: scale(1.05); }
+
+    @media (max-width: 700px) {
+      .container { padding: 26px 18px 18px; }
+      #floatingLogo { width: 62px; height: 62px; bottom: 14px; right: 14px; }
+      .page-credit { padding-bottom: 90px; }
+    }
+    @media (prefers-reduced-motion: reduce) { #floatingLogo:hover { transform: none; } }
+  </style>
+</head>
+<body>
+
+  <!-- ── INTRO OVERLAY ── -->
+  <div id="introOverlay">
+    <div class="intro-card">
+
+      <div class="intro-logo-wrap">
+        <img src="RheumWave Logo.png" alt="RheumWave Logo">
+      </div>
+
+      <h2>RheumWave Login</h2>
+      <p class="subtitle" id="introSubtitle">Enter your participant ID to save your results.</p>
+
+      <!-- PANEL 1 — sign in with an existing ID -->
+      <div class="intro-panel active" id="panelSignIn">
+        <div class="id-section">
+          <label for="participantInput">Participant ID</label>
+          <div class="id-input-row">
+            <input type="text" id="participantInput" placeholder="e.g. RW-013" autocomplete="off" />
+            <button id="verifyBtn" onclick="verifyParticipant()">Login</button>
+          </div>
+          <div id="idFeedback" class="info">Enter your ID to save scores and metrics to the study.</div>
+        </div>
+
+        <div class="switch-mode" id="toCreateRow">
+          Don't have an ID yet? <button type="button" onclick="showCreate()">Create one</button>
+        </div>
+
+        <div id="guestBlock">
+          <div class="divider">or</div>
+          <button class="guest-btn" onclick="continueAsGuest()">Continue as Guest — no data saved</button>
+        </div>
+
+        <p class="intro-note" id="signInNote">
+          Study participants have quiz scores and metrics securely saved. Create your ID with your study coordinator present.
+        </p>
+      </div>
+
+      <!-- PANEL 2 — create a new ID -->
+      <div class="intro-panel" id="panelCreate">
+        <div class="id-section">
+          <label for="newIdInput">Choose your participant ID</label>
+          <div class="id-input-row">
+            <input type="text" id="newIdInput" placeholder="e.g. RW-013" autocomplete="off" />
+            <button id="createBtn" onclick="createParticipant()">Create ID</button>
+          </div>
+          <div id="createFeedback" class="info">Do this with your study coordinator present.</div>
+          <div class="id-rules">
+            Your ID must be:
+            <ul>
+              <li>4 to 12 characters long</li>
+              <li>Letters, numbers and hyphens only</li>
+              <li>Not something that identifies you — no name, no birthdate</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="switch-mode">
+          Already have an ID? <button type="button" onclick="showSignIn()">Sign in</button>
+        </div>
+      </div>
+
+      <!-- PANEL 3 — confirm the created ID -->
+      <div class="intro-panel" id="panelCreated">
+        <div class="new-id-display">
+          <div class="label">Your participant ID</div>
+          <div class="value" id="createdIdValue">—</div>
+        </div>
+
+        <p class="intro-note" style="margin-top:0; border-top:none; padding-top:0;">
+          Write this down before continuing. It is the only way to reach your saved
+          progress from another device, and it cannot be looked up for you.
+        </p>
+
+        <div class="ack-row" style="margin-top:14px;">
+          <input type="checkbox" id="ackBox" onchange="document.getElementById('ackContinue').disabled = !this.checked;" />
+          <label for="ackBox">I have written down my participant ID and understand it cannot be recovered.</label>
+        </div>
+
+        <button class="primary-btn" id="ackContinue" disabled onclick="finishCreate()">Continue</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MAIN (no header on this page by design) ── -->
+  <div class="container">
+
+    <a class="back-link" id="backLink" href="index.html">← RheumWave</a>
+
+    <p class="page-label">Assessment</p>
+    <h1 class="page-title">Quizzes</h1>
+    <p class="page-intro">
+      Each quiz is a set of images to read and answer, sat in one go. Your
+      responses save to the study record under your participant ID, so sign in
+      before you begin.
+    </p>
+
+    <div id="sessionBanner">
+      <div class="left">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M7.5 1a6.5 6.5 0 1 0 0 13A6.5 6.5 0 0 0 7.5 1zm0 3v4l2.5 1.5" stroke-linecap="round"/>
+        </svg>
+        <span id="bannerText">Signed in — scores are being saved.</span>
+      </div>
+      <button onclick="switchUser()">Sign out</button>
+    </div>
+
+    <div class="grid">
+
+      <div class="card">
+        <div>
+          <div class="card-top">
+            <h3>Quiz 1</h3>
+            <span class="score-badge">Available</span>
+          </div>
+          <div class="meta">Mixed pathology · All regions</div>
+          <div class="attempts-line">Ready when you are</div>
+        </div>
+        <div class="actions">
+          <a class="btn" href="quizzes/quiz01.html" target="_blank">Open Quiz 1</a>
+        </div>
+      </div>
+
+      <div class="card locked">
+        <div>
+          <div class="card-top">
+            <h3>Quiz 2</h3>
+            <span class="score-badge">Coming soon</span>
+          </div>
+          <div class="meta">Mixed pathology · All regions</div>
+          <div class="attempts-line">Not published yet</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <p class="page-credit">© <span id="year"></span> RheumWave. For education only — not a substitute for clinical judgment.</p>
+
+  <img id="floatingLogo" src="RheumWave Logo.png" alt="MSK Ultrasound in Rheumatology Teaching">
+
+  <div id="syncStatus"></div>
+
+  <script src="rheumwave-config.js"></script>
+  <script src="rheumwave-sync.js"></script>
+  <script src="rheumwave-ui.js"></script>
+  <script>
+    // ── STATE ────────────────────────────────────────────────────────────────
+    let currentUser = null;
+
+    // ── SUPABASE ─────────────────────────────────────────────────────────────
+    async function supabaseReq(path, method='GET', body=null) {
+      const opts = {
+        method,
+        headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }
+      };
+      if (body) opts.body = JSON.stringify(body);
+      const res = await fetch(`${SUPABASE_URL}/rest/v1${path}`, opts);
+      if (!res.ok) throw new Error(`${res.status}`);
+      try { return await res.json(); } catch { return null; }
+    }
+
+    async function lookupID(id) {
+      try {
+        const rows = await supabaseReq(`/study_participants?participant_id=eq.${encodeURIComponent(id)}&select=participant_id`);
+        return rows && rows.length > 0 ? rows[0] : null;
+      } catch {
+        return VALID_IDS.includes(id) ? { participant_id: id } : null;
+      }
+    }
+
+    // ── AUTH ─────────────────────────────────────────────────────────────────
+    async function verifyParticipant() {
+      const input = document.getElementById('participantInput');
+      const fb    = document.getElementById('idFeedback');
+      const btn   = document.getElementById('verifyBtn');
+      const id    = normaliseID(input.value);
+      if (!id) { input.classList.add('error'); fb.className='err'; fb.textContent='Please enter your ID.'; return; }
+      input.classList.remove('error');
+      btn.disabled = true; btn.textContent = 'Checking…';
+      fb.className = 'info'; fb.textContent = 'Verifying…';
+      const result = await lookupID(id);
+      btn.disabled = false; btn.textContent = 'Login';
+      if (result) {
+        fb.className = 'ok'; fb.textContent = '✓ ID recognised. Welcome!';
+        setTimeout(() => startSession('participant', normaliseID(result.participant_id || id)), 650);
+      } else {
+        input.classList.add('error');
+        fb.className = 'err';
+        fb.textContent = ALLOW_SELF_REGISTER
+          ? 'ID not found. Check the spelling, or create a new ID below.'
+          : 'ID not found. Check with your study coordinator.';
+      }
+    }
+
+    // ── SELF-REGISTRATION ────────────────────────────────────────────────────
+    let pendingNewId = null;
+
+    async function registerParticipant(rawId) {
+      let res;
+      try {
+        res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/register_participant`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON,
+            'Authorization': `Bearer ${SUPABASE_ANON}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ new_id: rawId })
+        });
+      } catch (e) {
+        return { ok: false, reason: 'network' };
+      }
+      let body = null;
+      try { body = await res.json(); } catch (e) {}
+      if (!res.ok) {
+        const msg = String((body && (body.message || body.hint)) || '');
+        if (msg.includes('id_taken'))       return { ok: false, reason: 'taken'   };
+        if (msg.includes('invalid_format')) return { ok: false, reason: 'format'  };
+        if (res.status === 404)             return { ok: false, reason: 'missing' };
+        return { ok: false, reason: 'server' };
+      }
+      return { ok: true, id: normaliseID(body) };
+    }
+
+    async function createParticipant() {
+      const input = document.getElementById('newIdInput');
+      const fb    = document.getElementById('createFeedback');
+      const btn   = document.getElementById('createBtn');
+      const id    = normaliseID(input.value);
+
+      if (!ID_PATTERN.test(id)) {
+        input.classList.add('error');
+        fb.className = 'err';
+        fb.textContent = '4–12 characters, using letters, numbers and hyphens only.';
+        return;
+      }
+      input.classList.remove('error');
+      btn.disabled = true; btn.textContent = 'Creating…';
+      fb.className = 'info'; fb.textContent = 'Creating your ID…';
+
+      const result = await registerParticipant(id);
+      btn.disabled = false; btn.textContent = 'Create ID';
+
+      if (result.ok) {
+        pendingNewId = result.id;
+        document.getElementById('createdIdValue').textContent = pendingNewId;
+        document.getElementById('ackBox').checked = false;
+        document.getElementById('ackContinue').disabled = true;
+        showPanel('panelCreated');
+        return;
+      }
+
+      input.classList.add('error');
+      fb.className = 'err';
+      fb.textContent =
+        result.reason === 'taken'   ? 'That ID is already taken. Please choose another.' :
+        result.reason === 'format'  ? '4–12 characters, using letters, numbers and hyphens only.' :
+        result.reason === 'missing' ? 'Sign-up is not set up on this site yet. Tell the study coordinator.' :
+        result.reason === 'network' ? 'No connection. An ID has to be created online — try again.' :
+                                      'Something went wrong creating that ID. Please try again.';
+    }
+
+    function finishCreate() {
+      if (!pendingNewId) return;
+      if (!document.getElementById('ackBox').checked) return;
+      startSession('participant', pendingNewId);
+    }
+
+    // ── OVERLAY PANELS ───────────────────────────────────────────────────────
+    function showPanel(which) {
+      ['panelSignIn', 'panelCreate', 'panelCreated'].forEach(id =>
+        document.getElementById(id).classList.toggle('active', id === which));
+    }
+    function showCreate() {
+      document.getElementById('newIdInput').value = '';
+      document.getElementById('newIdInput').classList.remove('error');
+      const fb = document.getElementById('createFeedback');
+      fb.className = 'info'; fb.textContent = 'Do this with your study coordinator present.';
+      showPanel('panelCreate');
+      document.getElementById('newIdInput').focus();
+    }
+    function showSignIn() { showPanel('panelSignIn'); }
+
+    // ── ACCESS SWITCHES ──────────────────────────────────────────────────────
+    function applyAccessSwitches() {
+      document.getElementById('backLink').style.display     = SHOW_BACK_LINK ? '' : 'none';
+      document.getElementById('guestBlock').style.display  = ALLOW_GUEST_QUIZZES ? '' : 'none';
+      document.getElementById('toCreateRow').style.display = ALLOW_SELF_REGISTER ? '' : 'none';
+      if (!ALLOW_GUEST_QUIZZES) {
+        document.getElementById('introSubtitle').textContent =
+          'Enter your participant ID to continue, or create one if this is your first visit.';
+        document.getElementById('signInNote').textContent =
+          'Access is limited to study participants. Quiz scores and metrics are securely saved against your ID.';
+      }
+    }
+    applyAccessSwitches();
+
+    function continueAsGuest() {
+      if (!ALLOW_GUEST_QUIZZES) return;   // hard stop, even if the button is un-hidden
+      startSession('guest', null);
+    }
+
+    // ── SESSION ──────────────────────────────────────────────────────────────
+    function startSession(type, id) {
+      if (type === 'participant') id = normaliseID(id);
+      currentUser = { type, id };
+      localStorage.setItem(USER_KEY, JSON.stringify(currentUser));
+      document.getElementById('introOverlay').classList.add('hidden');
+
+      const banner = document.getElementById('sessionBanner');
+      if (type === 'participant') {
+        banner.classList.add('visible');
+        document.getElementById('bannerText').textContent = `Signed in as ${id} — scores are being saved to the study.`;
+      } else {
+        banner.classList.remove('visible');
+      }
+    }
+
+    function switchUser() {
+      currentUser = null;
+      localStorage.removeItem(USER_KEY);
+      document.getElementById('sessionBanner').classList.remove('visible');
+      document.getElementById('introOverlay').classList.remove('hidden');
+      document.getElementById('participantInput').value = '';
+      document.getElementById('idFeedback').className = 'info';
+      document.getElementById('idFeedback').textContent = 'Enter your ID to save scores and metrics to the study.';
+      pendingNewId = null;
+      showPanel('panelSignIn');
+    }
+
+    // ── THEME ────────────────────────────────────────────────────────────────
+    // No toggle here — this page has no header by design. rheumwave-ui.js
+    // applies whatever theme was last chosen on the homepage or case library,
+    // and stamps the year, so there is nothing to do here.
+
+    // ── INIT ─────────────────────────────────────────────────────────────────
+    document.getElementById('participantInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') verifyParticipant();
+    });
+    document.getElementById('newIdInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') createParticipant();
+    });
+
+    // Deliberately does NOT restore a session. cases.html signs people back in
+    // from USER_KEY; this page always asks again, so entering a scored quiz is
+    // a conscious act rather than something inherited from a tab left open on
+    // the case library. A guest session is left alone rather than cleared —
+    // guests are still welcome on the cases, and this page has no business
+    // signing them out of a page whose own switch still permits them.
+  </script>
+</body>
+</html>

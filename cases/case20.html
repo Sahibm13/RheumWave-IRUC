@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Backend title (do not surface to learner — reveals the final diagnosis): "Knee osteoarthritis with cartilage degeneration, CPPD chondrocalcinosis and a popliteal (Baker's) cyst" -->
+  <title>Case 20 | RheumWave</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Shared stylesheets. Works whether this file sits in cases/ or next to
+       index.html. Order matters: tokens, then chrome, then the case layout. -->
+  <script>
+    (function () {
+      var up = location.pathname.indexOf('/cases/') !== -1 ? '../' : '';
+      window.RW_UP = up;
+      ['rheumwave-theme.css', 'rheumwave-chrome.css', 'rheumwave-case.css'].forEach(function (f) {
+        document.write('<link rel="stylesheet" href="' + up + f + '">');
+      });
+    })();
+  </script>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+
+      <a class="brand" href="../index.html">
+        <strong>RheumWave</strong>
+        <span>Interactive Rheumatology Ultrasound Cases</span>
+      </a>
+
+      <nav id="siteNav">
+        <a href="../index.html">Home</a>
+        <a href="../cases.html" aria-current="page">Cases</a>
+        <a href="../quizzes.html">Quizzes</a>
+        <a href="../resources.html">Resources</a>
+        <a href="../about.html">About</a>
+        <a href="../contact.html">Contact</a>
+        <a href="../disclaimer.html">Disclaimer</a>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Menu sits left of Sign in; it only shows once the tabs collapse. -->
+        <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+        </button>
+
+        <!-- Signed out or guest: the button. Signed in: the ID and Sign out. -->
+        <a class="signin-btn" id="signInBtn" href="../cases.html">Sign in</a>
+        <div id="sessionBox">
+          <span class="session-pill"><span class="dot"></span><span id="sessionId">—</span></span>
+          <button id="signOutBtn" type="button">Sign out</button>
+        </div>
+
+        <button class="theme-btn" id="themeToggle">
+          <span id="themeIcon">🌙</span><span class="theme-label" id="themeLabel">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Case header. The number, region and level are overwritten at load time
+         from rheumwave-cases.js; what's typed here is only a fallback. -->
+    <div class="case-header">
+      <p class="case-num" id="caseNum">Case 20</p>
+      <h2 id="caseHeading" data-case-title="Knee osteoarthritis with cartilage degeneration, CPPD chondrocalcinosis and a popliteal (Baker's) cyst">Case 20</h2>
+      <div class="case-meta">
+        <span class="tag tag-level"  id="tagLevel">Intro</span>
+        <span class="tag tag-region" id="tagRegion">Knee</span>
+        <!-- Pathology kept for the backend but hidden — it gives away the answer -->
+        <span class="tag tag-path" data-pathology="Soft Tissue/Tendon" style="display:none;">Soft Tissue/Tendon</span>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <span class="progress-label" id="progressLabel">Question 1 of 4</span>
+    </div>
+
+    <!-- ══ VIGNETTE ════════════════════════════════════════════════════════ -->
+    <div class="vignette pinned collapsed" id="vignette">
+      <div class="vignette-header">
+        <div style="flex:1;">
+          <p class="vignette-summary">Case Vignette</p>
+          <p class="vignette-lead">70-year-old man with multiple comorbidities and progressive bilateral knee pain. <span style="color:var(--ink-3);">(Expand for full history &amp; investigations.)</span></p>
+          <div class="vignette-full">
+            <p>
+              A 70-year-old man with a history of type 2 diabetes mellitus, hypertension, coronary
+              artery disease, MASLD, a previous TIA, atrial fibrillation and mild CKD presents with
+              progressive bilateral knee pain.
+            </p>
+            <p>
+              The pain comes on with use — walking or stairs — and improves with rest. There are
+              occasional episodes of knee swelling lasting a few days. He finds some benefit with
+              acetaminophen, and avoids NSAIDs because of his comorbidities.
+            </p>
+            <p>
+              An X-ray report comments on knee osteoarthritis. Serology is all negative and the CRP
+              is 7&nbsp;mg/L. You do a bedside ultrasound.
+            </p>
+          </div>
+        </div>
+        <button class="vignette-toggle" id="vignetteToggle" onclick="toggleVignette()">Expand</button>
+      </div>
+    </div>
+
+    <!-- ══ Q1 ═════════════════════════════════════════════════════════════ -->
+    <div class="step">
+
+      <div class="step-images">
+        <h3>Bedside Ultrasound — Suprapatellar Transverse, Maximum Flexion</h3>
+        <div class="image-grid">
+          <img src="images/case20/Q1.png" alt="Knee, suprapatellar transverse view in maximum flexion, grey-scale"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+        </div>
+      </div>
+
+      <div class="question-block">
+        <div class="q-header">
+          <span class="q-num">Q1</span>
+          <span class="q-text">Which of the following findings is <strong>NOT</strong> seen on this suprapatellar maximum flexion transverse view of the knee?</span>
+        </div>
+
+        <div class="options">
+          <div class="option" data-val="a" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Increased echogenicity of cartilage</span>
+          </div>
+          <div class="option" data-val="b" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Loss of the superior surface contour of cartilage</span>
+          </div>
+          <div class="option" data-val="c" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Femoral hyaline cartilage degeneration</span>
+          </div>
+          <div class="option" data-val="d" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Knee effusion</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          This image shows <strong>femoral hyaline cartilage degeneration in osteoarthritis</strong>.
+          Early degenerative change shows a diffuse increase in echogenicity of the cartilage while
+          cartilage width and the contour of the superior surface are maintained. Progressively there
+          is loss of the superior surface contour, then focal loss and thinning of the cartilage.
+          Eventually the cartilage damage can extend to affect the bony cortex of the femoral surface
+          in severe OA.
+          <div class="image-grid" style="margin-top:14px;">
+            <img src="images/case20/A1a.png" alt="Normal femoral hyaline cartilage, suprapatellar transverse view"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+            <img src="images/case20/A1b.png" alt="Femoral hyaline cartilage degeneration in knee osteoarthritis"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Q2 ═════════════════════════════════════════════════════════════ -->
+    <div class="step">
+
+      <div class="step-images">
+        <h3>Suprapatellar Transverse, Flexion — Two Different Knees</h3>
+        <div class="image-grid">
+          <img src="images/case20/Q2.png" alt="Knee, suprapatellar transverse view in flexion, grey-scale, two panels"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+        </div>
+      </div>
+
+      <div class="question-block">
+        <div class="q-header">
+          <span class="q-num">Q2</span>
+          <span class="q-text">If you were to scan the knees in the suprapatellar maximum flexion transverse view and instead see these images, what would be the diagnosis?</span>
+        </div>
+
+        <div class="options">
+          <div class="option" data-val="a" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Uric acid deposits (gout)</span>
+          </div>
+          <div class="option" data-val="b" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Chondrocalcinosis (CPPD)</span>
+          </div>
+          <div class="option" data-val="c" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Foreign bodies</span>
+          </div>
+          <div class="option" data-val="d" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Chondrocalcinosis on the left and double contour sign on the right</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          The images show <strong>intra-cartilaginous calcific deposits of the femoral cartilage in
+          CPPD arthropathy</strong>. Calcific deposits can be rounded hyperechoic deposits within the
+          cartilage, of various sizes (left image), or can look like dense hyperechoic deposition
+          within the cartilage (right image).
+          <div class="image-grid" style="margin-top:14px;">
+            <img src="images/case20/A2a.png" alt="Intra-cartilaginous calcific deposits of the femoral cartilage in CPPD"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          </div>
+          <br>
+
+          Calcium deposition is also commonly seen in the menisci.
+          <div class="image-grid" style="margin-top:14px;">
+            <img src="images/case20/A2b.png" alt="Calcium deposition within the meniscus"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          </div>
+          <br>
+
+          The <strong>double contour sign</strong> is a hyperechoic band that appears parallel to the
+          bone, just above the cartilage. Calcium deposits, by contrast, are
+          <strong>intra-cartilaginous</strong>.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Q3 ═════════════════════════════════════════════════════════════ -->
+    <div class="step">
+      <div class="question-block">
+        <div class="q-header">
+          <span class="q-num">Q3</span>
+          <span class="q-text">Which of the following blood test panels should be ordered if chondrocalcinosis is seen on ultrasound or X-rays?</span>
+        </div>
+
+        <div class="options">
+          <div class="option" data-val="a" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Calcium, phosphate, PTH, ALP, iron studies, TSH</span>
+          </div>
+          <div class="option" data-val="b" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Calcium, phosphate, magnesium, PTH, ALP, iron studies, creatinine</span>
+          </div>
+          <div class="option" data-val="c" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Calcium, phosphate, magnesium, PTH, ALP, iron studies, TSH</span>
+          </div>
+          <div class="option" data-val="d" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Calcium, phosphate, magnesium, PTH, iron studies, TSH</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          A secondary workup for CPPD involves laboratory testing to check for underlying metabolic
+          conditions. This evaluation is especially important for patients who are young (typically
+          under 50 years old), have severe or unusual polyarticular involvement, or experience
+          unusually heavy or recurrent flares.<br><br>
+
+          The key metabolic associations are <strong>hyperparathyroidism, hemochromatosis,
+          hypomagnesemia, hypophosphatasia and hypothyroidism</strong>. The testing should reflect
+          the screening laboratory tests for these conditions.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Q4 ═════════════════════════════════════════════════════════════ -->
+    <div class="step">
+
+      <div class="step-images">
+        <h3>Popliteal Fossa — Posterior Knee</h3>
+        <div class="image-grid">
+          <img src="images/case20/Q4.png" alt="Popliteal fossa, posterior knee, grey-scale"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+        </div>
+      </div>
+
+      <div class="question-block">
+        <div class="new-info">
+          <span class="ni-label">New Information</span>
+          <p>
+            The patient also complains of pain at the posterior knee. He is anticoagulated for his
+            atrial fibrillation. You decide to scan that area at the popliteal fossa.
+          </p>
+        </div>
+
+        <div class="q-header">
+          <span class="q-num">Q4</span>
+          <span class="q-text">Which of the following is the most accurate sonographic diagnosis?</span>
+        </div>
+
+        <div class="options">
+          <div class="option" data-val="a" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Popliteal cyst (Baker's cyst)</span>
+          </div>
+          <div class="option" data-val="b" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Knee effusion seen posteriorly</span>
+          </div>
+          <div class="option" data-val="c" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Hemorrhagic collection</span>
+          </div>
+          <div class="option" data-val="d" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Cyst extending from the meniscus</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          The <strong>popliteal or Baker's cyst</strong> lies postero-medially between the
+          semimembranosus tendon and the medial head of gastrocnemius, at the level of the upper
+          medial femoral condyle. There is often a unidirectional communication between the Baker's
+          cyst and the joint recess.<br><br>
+
+          A <strong>hemorrhagic effusion</strong>, by contrast, is seen as echogenic fluid with
+          displaceable echogenic blood cells — worth keeping in mind in an anticoagulated patient.
+          <div class="image-grid" style="margin-top:14px;">
+            <img src="images/case20/A4.png" alt="Hemorrhagic effusion with displaceable echogenic blood cells"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ NAVIGATION & RESULT (leave as-is in every case) ═════════════════ -->
+    <div class="step-nav" id="stepNav">
+      <span class="nav-warning" id="navWarning">Please answer the question before continuing.</span>
+      <button class="next-btn" id="nextBtn" onclick="nextStep()">Next →</button>
+    </div>
+
+    <div id="finalResult">
+      <div class="score-big" id="scoreBig">—</div>
+      <div class="score-label">Your score for this case</div>
+      <div class="final-explanation">
+        <strong>Summary:</strong> Mechanical bilateral knee pain in an older patient with a
+        radiograph reporting osteoarthritis is a common referral, and the suprapatellar transverse
+        view in maximum flexion is the window that makes the femoral hyaline cartilage assessable at
+        the bedside. Degeneration progresses in a recognisable order — increased echogenicity first,
+        with width and superior contour preserved, then loss of that contour, then focal loss and
+        thinning, and finally involvement of the underlying cortex. Learn to separate two things that
+        both brighten the cartilage: <strong>chondrocalcinosis in CPPD sits inside the
+        cartilage</strong>, whether as discrete rounded deposits or dense confluent deposition, and
+        it is also common in the menisci, whereas the <strong>double contour sign of gout</strong>
+        lies on top of the cartilage, parallel to the bone. Finding chondrocalcinosis is not the end
+        of the assessment: it prompts a metabolic screen for hyperparathyroidism, hemochromatosis,
+        hypomagnesemia, hypophosphatasia and hypothyroidism. Finally, posterior knee pain has its own
+        differential — a <strong>Baker's cyst</strong> sits postero-medially between the
+        semimembranosus tendon and the medial head of gastrocnemius, and in an anticoagulated patient
+        it is worth looking for the displaceable echogenic cells that mark a hemorrhagic collection
+        instead.
+      </div>
+      <button class="retry-btn" onclick="retryCase()">↻ Retry Case</button>
+      <button class="back-btn"  onclick="goBack()">← Back to Cases</button>
+    </div>
+
+    <!-- Provenance line. Filled in by the engine from the `developed` field in
+         rheumwave-cases.js. Leave it empty and hidden. -->
+    <p class="case-credit" id="caseCredit" style="display:none;"></p>
+
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <div class="footer-grid">
+
+        <div>
+          <a class="footer-brand" href="../index.html">
+            <img src="../RheumWave Logo.png" alt="">
+            <strong>RheumWave</strong>
+          </a>
+          <p class="footer-about">
+            Case-based teaching for musculoskeletal ultrasound in rheumatology, built for trainees
+            and early-career rheumatologists.
+          </p>
+          <a class="footer-contact" href="../contact.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>
+            </svg>
+            Get in touch
+          </a>
+        </div>
+
+        <div class="footer-col">
+          <h5>Learn</h5>
+          <ul>
+            <li><a href="../cases.html">Cases</a></li>
+            <li><a href="../quizzes.html">Quizzes</a></li>
+            <li><a href="../resources.html">Resources</a></li>
+            <li><a href="../index.html#how-it-works">How it works</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>About</h5>
+          <ul>
+            <li><a href="../about.html">About RheumWave</a></li>
+            <li><a href="../contact.html">Contact</a></li>
+            <li><a href="../disclaimer.html">Disclaimer</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <span>© <span id="year"></span> RheumWave. All rights reserved.</span>
+        <span>For education only — not a substitute for clinical judgment. <a href="../disclaimer.html">Read the full disclaimer</a>.</span>
+      </div>
+    </div>
+  </footer>
+  <div id="syncStatus"></div>
+
+  <div id="usLightbox" onclick="closeLightbox(event)">
+    <button id="usLightboxClose" onclick="closeLightbox(event)" aria-label="Close">&times;</button>
+    <img id="usLightboxImg" src="" alt="">
+    <div id="usLightboxCaption"></div>
+  </div>
+
+  <!-- ══ THE ONLY LINE TO CHANGE PER CASE ═══════════════════════════════════
+       Must match the id in rheumwave-cases.js. It is the key every score is
+       filed under, so never change it once a case has been attempted. -->
+  <script>window.RW_CASE_ID = 20;</script>
+
+  <script>
+    (function () {
+      var up = window.RW_UP || '';
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-config.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-cases.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-sync.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-ui.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-case-engine.js"><\/scr' + 'ipt>');
+    })();
+  </script>
+
+</body>
+</html>

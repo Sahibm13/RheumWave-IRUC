@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Backend title (do not surface to learner — reveals the final diagnosis): "Effusion in Feet (Normal)" -->
+  <title>Case 2 | RheumWave</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Shared stylesheets. Works whether this file sits in cases/ or next to
+       index.html. Order matters: tokens, then chrome, then the case layout. -->
+  <script>
+    (function () {
+      var up = location.pathname.indexOf('/cases/') !== -1 ? '../' : '';
+      window.RW_UP = up;
+      ['rheumwave-theme.css', 'rheumwave-chrome.css', 'rheumwave-case.css'].forEach(function (f) {
+        document.write('<link rel="stylesheet" href="' + up + f + '">');
+      });
+    })();
+  </script>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+
+      <a class="brand" href="../index.html">
+        <strong>RheumWave</strong>
+        <span>Interactive Rheumatology Ultrasound Cases</span>
+      </a>
+
+      <nav id="siteNav">
+        <a href="../index.html">Home</a>
+        <a href="../cases.html" aria-current="page">Cases</a>
+        <a href="../quizzes.html">Quizzes</a>
+        <a href="../resources.html">Resources</a>
+        <a href="../about.html">About</a>
+        <a href="../contact.html">Contact</a>
+        <a href="../disclaimer.html">Disclaimer</a>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Menu sits left of Sign in; it only shows once the tabs collapse. -->
+        <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+        </button>
+
+        <!-- Signed out or guest: the button. Signed in: the ID and Sign out. -->
+        <a class="signin-btn" id="signInBtn" href="../cases.html">Sign in</a>
+        <div id="sessionBox">
+          <span class="session-pill"><span class="dot"></span><span id="sessionId">—</span></span>
+          <button id="signOutBtn" type="button">Sign out</button>
+        </div>
+
+        <button class="theme-btn" id="themeToggle">
+          <span id="themeIcon">🌙</span><span class="theme-label" id="themeLabel">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Case header. The number, region and level are overwritten at load time
+         from rheumwave-cases.js; what's typed here is only a fallback. -->
+    <div class="case-header">
+      <p class="case-num" id="caseNum">Case 2</p>
+      <h2 id="caseHeading" data-case-title="Effusion in Feet (Normal)">Case 2</h2>
+      <div class="case-meta">
+        <span class="tag tag-level"  id="tagLevel">Intro</span>
+        <span class="tag tag-region" id="tagRegion">Foot/Ankle</span>
+        <!-- Pathology kept for the backend but hidden — it gives away the answer -->
+        <span class="tag tag-path" data-pathology="Normal" style="display:none;">Normal</span>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <span class="progress-label" id="progressLabel">Question 1 of 2</span>
+    </div>
+
+    <!-- ══ VIGNETTE ════════════════════════════════════════════════════════ -->
+    <div class="vignette pinned collapsed" id="vignette">
+      <div class="vignette-header">
+        <div style="flex:1;">
+          <p class="vignette-summary">Case Vignette</p>
+          <p class="vignette-lead">A <strong>55-year-old female</strong> is seen in the Rheumatology clinic for bilateral foot pain. <span style="color:var(--ink-3);">(Expand for full history &amp; exam.)</span></p>
+          <div class="vignette-full">
+            <p>A <strong>55-year-old female</strong> is seen in the Rheumatology clinic for consultation due to bilateral foot pain. Her pain comes on mostly when she goes for longer walks and improves with rest. There is no prolonged morning stiffness, and she has not noticed any overt clinical swelling. There is no joint pain in the proximal lower extremities or in the upper extremities, and she has no extra-articular manifestations of inflammatory arthritis.</p>
+            <p>She works a desk job. She does not smoke or drink. She has mild dyslipidaemia and pre-diabetes.</p>
+            <p>On examination, her BMI is 28 and vitals are normal. There is mild pes planus bilaterally and tenderness at all the MTP joints, but no clinical swelling. There are no toe deformities and no tophi. The rest of the examination is normal, with no other swollen or tender joints.</p>
+            <p>X-rays are normal. Serology is negative for RF, anti-CCP and ANA, and HLA-B27 is negative. CRP is 6.4 mg/L.</p>
+            <p>Her mother had rheumatoid arthritis which affected the feet, so she is concerned this is the start of RA in her. You decide to perform a bedside MSK ultrasound of her MTPs.</p>
+          </div>
+        </div>
+        <button class="vignette-toggle" id="vignetteToggle" onclick="toggleVignette()">Expand</button>
+      </div>
+    </div>
+
+    <!-- ══ QUESTION 1 ══════════════════════════════════════════════════════ -->
+    <div class="step">
+      <!-- Images appear immediately before the question they belong to.
+           IMAGE SLOTS 1–4: the four MTP views the learner sees up front. -->
+      <div class="step-images">
+        <h3>Bedside Ultrasound — Metatarsophalangeal Joints</h3>
+        <div class="image-grid">
+          <img src="images/case02/Q1a.png" alt="1st MTP joint, longitudinal view"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          <img src="images/case02/Q1b.png" alt="1st MTP joint, transverse view"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          <img src="images/case02/Q1c.png" alt="2nd MTP joint, longitudinal view"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          <img src="images/case02/Q1d.png" alt="2nd MTP joint, transverse view"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+        </div>
+      </div>
+      <div class="question-block">
+        <!-- Optional. Delete the style attribute to show it. -->
+        <div class="new-info" style="display:none;">
+          <span class="ni-label">New Information</span>
+          <p><!-- TODO: new info revealed at this question --></p>
+        </div>
+        <div class="q-header">
+          <span class="q-num">Q1</span>
+          <span class="q-text">You are surprised to see some abnormalities on the ultrasound, as it doesn't look like the normal images you have seen during your ultrasound training and online. The most appropriate response to tell the patient is:</span>
+        </div>
+        <div class="options">
+          <div class="option" data-val="a" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">There is subtle inflammation (synovitis) at the joints that likely suggests subclinical synovitis and early rheumatoid arthritis. We should keep an eye on you.</span>
+          </div>
+          <div class="option" data-val="b" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">There is osteoarthritis on the ultrasound with effusions (fluid).</span>
+          </div>
+          <div class="option" data-val="c" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">There are small effusions (fluid) in the joints but no signs of inflammation. This can be seen in a significant proportion of the general population.</span>
+          </div>
+          <div class="option" data-val="d" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">There is a double contour sign with effusions. This likely suggests your uric acid is high and we should test it.</span>
+          </div>
+        </div>
+        <div class="explanation">
+          <!-- IMAGE SLOTS 5–8: the same four views, annotated, shown with the answer. -->
+          <div class="image-grid" style="margin-bottom:14px;">
+            <img src="images/case02/Q1a - answers.png" alt="1st MTP longitudinal — anechoic effusion with cartilage interface sign"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+            <img src="images/case02/Q1b - answers.png" alt="1st MTP transverse — anechoic effusion, no Doppler signal"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+            <img src="images/case02/Q1c - answers.png" alt="2nd MTP longitudinal — small anechoic effusion"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+            <img src="images/case02/Q1d - answers.png" alt="2nd MTP transverse — small anechoic effusion, no synovial hypertrophy"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          </div>
+          The images of the <strong>1st and 2nd MTP</strong> demonstrate <strong>effusions</strong>, which are anechoic and can cause synovial distension with smooth reflection posteriorly (towards the midfoot). On dynamic testing, effusions should be compressible.<br><br>
+          The effusion is accentuating the <strong>cartilage interface sign</strong> — a thin, distinct bright line sitting right above the dark (hypoechoic) articular cartilage, accentuated when there is hypoechoic or anechoic material (synovitis or effusion) within the joint. It is often confused with the double contour sign of gout, and can be differentiated by compressing the effusion or dynamically moving the joint or probe: the interface sign will disappear or change with probe angle, whereas the double contour sign should persist.<br><br>
+          There is no significant osteoarthritis really seen on these images. There is no Doppler synovitis, and no significant grey-scale synovitis or synovial hypertrophy.<br><br>
+          The images essentially show effusion/fluid at the MTP joints in two planes without Doppler. <strong>A small amount of MTP joint effusion is a well-recognised normal ultrasound finding, particularly at the 1st MTP, and isolated effusion without synovial hypertrophy or Doppler signal has relatively poor specificity for inflammatory arthritis.</strong> It can be seen in the general population, in early OA, and in those with structural foot/ankle issues (e.g. pes planus). It is a common mistake among beginners to call normal physiological fluid an abnormality or pathology, and to label the patient as having inflammatory arthritis — be careful with this common mistake.<br><br>
+          In this case, her symptoms, exam and blood work all point away from an inflammatory arthritis, and the ultrasound confirms that.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ QUESTION 2 ══════════════════════════════════════════════════════ -->
+    <div class="step">
+      <!-- IMAGE SLOT 9: the arrow-annotated view for Q2. -->
+      <div class="step-images">
+        <h3>Bedside Ultrasound — MTP Joint (annotated)</h3>
+        <div class="image-grid">
+          <img src="images/case02/Q2.png" alt="MTP joint longitudinal view with arrow indicating a bright line above the articular cartilage"
+               class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+        </div>
+      </div>
+      <div class="question-block">
+        <div class="new-info" style="display:none;">
+          <span class="ni-label">New Information</span>
+          <p><!-- TODO: new info revealed at this question --></p>
+        </div>
+        <div class="q-header">
+          <span class="q-num">Q2</span>
+          <span class="q-text">The arrow is pointing towards which of the following ultrasound findings?</span>
+        </div>
+        <div class="options">
+          <div class="option" data-val="a" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Interface sign</span>
+          </div>
+          <div class="option" data-val="b" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Double contour sign of gout</span>
+          </div>
+          <div class="option" data-val="c" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Calcium deposition seen with CPPD</span>
+          </div>
+          <div class="option" data-val="d" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Osteophytes</span>
+          </div>
+          <div class="option" data-val="e" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Synovial hypertrophy</span>
+          </div>
+        </div>
+        <div class="explanation">
+          The arrow is showing an <strong>interface sign</strong>. The effusion is accentuating the cartilage interface sign — a thin, distinct bright line sitting right above the dark (hypoechoic) articular cartilage, accentuated when there is hypoechoic or anechoic material (synovitis or effusion) within the joint. It is often confused with the double contour sign of gout, and can be differentiated by compressing the effusion or dynamically moving the joint or probe: the interface sign will disappear or change with probe angle, whereas the double contour sign should persist.<br><br>
+          <strong>Calcium deposition seen with CPPD</strong> shows hyperechoic foci or bands located <em>within</em> the hyaline cartilage, without posterior acoustic shadowing (unless very large or calcified).
+          <!-- IMAGE SLOT 10: CPPD comparison image, so the learner can see what calcific deposits look like. -->
+          <div class="image-grid" style="margin:12px 0;">
+            <img src="images/case02/Q2 - answers.png" alt="CPPD — hyperechoic deposits within hyaline cartilage for comparison"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          </div>
+          <strong>Osteophytes</strong> are hyperechoic step-up bony prominences seen at the margin of the joint, visible in two perpendicular planes and continuous with the underlying bony cortex.<br><br>
+          <strong>Synovial hypertrophy</strong> is abnormal hypoechoic (relative to subdermal fat, though it may be isoechoic or hyperechoic) intra-articular tissue that is non-displaceable and poorly compressible, and may exhibit Doppler signal — there will be no Doppler in fluid/effusion.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ NAVIGATION & RESULT (leave as-is in every case) ═════════════════ -->
+    <div class="step-nav" id="stepNav">
+      <span class="nav-warning" id="navWarning">Please answer the question before continuing.</span>
+      <button class="next-btn" id="nextBtn" onclick="nextStep()">Next →</button>
+    </div>
+
+    <div id="finalResult">
+      <div class="score-big" id="scoreBig">—</div>
+      <div class="score-label">Your score for this case</div>
+      <div class="final-explanation">
+        <strong>Summary:</strong> This patient has <strong>small physiological MTP joint effusions</strong>, not inflammatory arthritis. Mechanical pain that improves with rest, no prolonged morning stiffness, no clinical swelling, negative serology and normal X-rays all point away from RA. On ultrasound, an isolated anechoic, compressible effusion without synovial hypertrophy or Doppler signal has poor specificity for inflammatory arthritis and is a well-recognised normal finding, particularly at the 1st MTP — and is also seen with early OA and structural foot problems such as pes planus. The bright line above the cartilage is the <strong>interface sign</strong> accentuated by the fluid, not a double contour sign; it changes or disappears with probe angle, whereas a true double contour persists. Over-calling normal physiological fluid is one of the commonest beginner errors, and risks mislabelling a patient as having inflammatory arthritis.
+      </div>
+      <button class="retry-btn" onclick="retryCase()">↻ Retry Case</button>
+      <button class="back-btn"  onclick="goBack()">← Back to Cases</button>
+    </div>
+
+    <p class="case-credit" id="caseCredit" style="display:none;"></p>
+
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <div class="footer-grid">
+
+        <div>
+          <a class="footer-brand" href="../index.html">
+            <img src="../RheumWave Logo.png" alt="">
+            <strong>RheumWave</strong>
+          </a>
+          <p class="footer-about">
+            Case-based teaching for musculoskeletal ultrasound in rheumatology, built for trainees
+            and early-career rheumatologists.
+          </p>
+          <a class="footer-contact" href="../contact.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>
+            </svg>
+            Get in touch
+          </a>
+        </div>
+
+        <div class="footer-col">
+          <h5>Learn</h5>
+          <ul>
+            <li><a href="../cases.html">Cases</a></li>
+            <li><a href="../quizzes.html">Quizzes</a></li>
+            <li><a href="../resources.html">Resources</a></li>
+            <li><a href="../index.html#how-it-works">How it works</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>About</h5>
+          <ul>
+            <li><a href="../about.html">About RheumWave</a></li>
+            <li><a href="../contact.html">Contact</a></li>
+            <li><a href="../disclaimer.html">Disclaimer</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <span>© <span id="year"></span> RheumWave. All rights reserved.</span>
+        <span>For education only — not a substitute for clinical judgment. <a href="../disclaimer.html">Read the full disclaimer</a>.</span>
+      </div>
+    </div>
+  </footer>
+  <div id="syncStatus"></div>
+
+  <div id="usLightbox" onclick="closeLightbox(event)">
+    <button id="usLightboxClose" onclick="closeLightbox(event)" aria-label="Close">&times;</button>
+    <img id="usLightboxImg" src="" alt="">
+    <div id="usLightboxCaption"></div>
+  </div>
+
+  <!-- ══ THE ONLY LINE TO CHANGE PER CASE ═══════════════════════════════════
+       Must match the id in rheumwave-cases.js. It is the key every score is
+       filed under, so never change it once a case has been attempted. -->
+  <script>window.RW_CASE_ID = 2;</script>
+
+  <script>
+    (function () {
+      var up = window.RW_UP || '';
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-config.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-cases.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-sync.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-ui.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-case-engine.js"><\/scr' + 'ipt>');
+    })();
+  </script>
+
+</body>
+</html>
