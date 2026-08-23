@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Backend title (do not surface to learner — reveals the final diagnosis): "Nodal hand osteoarthritis at the DIP joints in a patient with psoriasis — no concomitant psoriatic arthritis" -->
+  <title>Case 14 | RheumWave</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Shared stylesheets. Works whether this file sits in cases/ or next to
+       index.html. Order matters: tokens, then chrome, then the case layout. -->
+  <script>
+    (function () {
+      var up = location.pathname.indexOf('/cases/') !== -1 ? '../' : '';
+      window.RW_UP = up;
+      ['rheumwave-theme.css', 'rheumwave-chrome.css', 'rheumwave-case.css'].forEach(function (f) {
+        document.write('<link rel="stylesheet" href="' + up + f + '">');
+      });
+    })();
+  </script>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+
+      <a class="brand" href="../index.html">
+        <strong>RheumWave</strong>
+        <span>Interactive Rheumatology Ultrasound Cases</span>
+      </a>
+
+      <nav id="siteNav">
+        <a href="../index.html">Home</a>
+        <a href="../cases.html" aria-current="page">Cases</a>
+        <a href="../quizzes.html">Quizzes</a>
+        <a href="../resources.html">Resources</a>
+        <a href="../about.html">About</a>
+        <a href="../contact.html">Contact</a>
+        <a href="../disclaimer.html">Disclaimer</a>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Menu sits left of Sign in; it only shows once the tabs collapse. -->
+        <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+        </button>
+
+        <!-- Signed out or guest: the button. Signed in: the ID and Sign out. -->
+        <a class="signin-btn" id="signInBtn" href="../cases.html">Sign in</a>
+        <div id="sessionBox">
+          <span class="session-pill"><span class="dot"></span><span id="sessionId">—</span></span>
+          <button id="signOutBtn" type="button">Sign out</button>
+        </div>
+
+        <button class="theme-btn" id="themeToggle">
+          <span id="themeIcon">🌙</span><span class="theme-label" id="themeLabel">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Case header. The number, region and level are overwritten at load time
+         from rheumwave-cases.js; what's typed here is only a fallback. -->
+    <div class="case-header">
+      <p class="case-num" id="caseNum">Case 14</p>
+      <h2 id="caseHeading" data-case-title="Nodal hand osteoarthritis at the DIP joints in a patient with psoriasis — no concomitant psoriatic arthritis">Case 14</h2>
+      <div class="case-meta">
+        <span class="tag tag-level"  id="tagLevel">Advanced</span>
+        <span class="tag tag-region" id="tagRegion">Hand/Wrist</span>
+        <!-- Pathology kept for the backend but hidden — it gives away the answer -->
+        <span class="tag tag-path" data-pathology="Osteoarthritis" style="display:none;">Osteoarthritis</span>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <span class="progress-label" id="progressLabel">Question 1 of 5</span>
+    </div>
+
+    <!-- ══ VIGNETTE ════════════════════════════════════════════════════════
+         Opens expanded, because the whole scan is presented up front and the
+         learner needs to see it before Q1. It stays on screen for every
+         question, so the images remain available throughout the case. -->
+    <div class="vignette pinned" id="vignette">
+      <div class="vignette-header">
+        <div style="flex:1;">
+          <p class="vignette-summary">Case Vignette</p>
+          <p class="vignette-lead">56-year-old woman with long-standing plaque psoriasis, referred with two years of bilateral hand arthralgia. <span style="color:var(--ink-3);">(Expand for full history, exam &amp; the complete scan.)</span></p>
+          <div class="vignette-full">
+            <p>
+              A 56-year-old woman with a 20-year history of plaque psoriasis and nail pitting,
+              currently well controlled on risankizumab (an IL-23 inhibitor), is referred to the
+              rheumatology clinic with hand arthralgia over the last two years. Her dermatologist
+              is concerned about the development of possible psoriatic arthritis and is wondering
+              whether the biologic needs to be changed.
+            </p>
+            <p>
+              She describes arthralgia over the DIP and PIP joints of both hands. It came on
+              insidiously but has worsened over the last six months, which is also when she noticed
+              more swelling at the DIP joints. She reports some boggy swelling that fluctuates, and
+              some hard nodular swelling that is persistent — "it has never gone back to looking
+              normal." She has also noticed some nail pitting in the last six months. Morning
+              stiffness in the hands lasts about 20–30 minutes, and the hands feel stiff and gelled
+              if she has not used them for a while, but in general the pain is worse with use and in
+              the evenings. Symptoms respond dramatically to naproxen 220&nbsp;mg twice daily, which
+              her family physician asked her to use. There is no night pain. There is no swelling or
+              pain at other joints, no symptoms or signs of dactylitis, no entheseal pain or
+              swelling, and no inflammatory back pain.
+            </p>
+            <p>
+              She is otherwise healthy with no chronic medical conditions. She has had two
+              Caesarean sections and an appendectomy, and entered menopause three years ago. She
+              takes no regular medications other than risankizumab and as-needed naproxen. Family
+              history is non-contributory. She neither drinks nor smokes. She works as executive
+              director of a non-profit organization and has found some of the fine motor work in her
+              job difficult.
+            </p>
+            <p>
+              Examination reveals nodular changes with bogginess and effusions at most of the DIP
+              joints, which are tender. There is no swelling at the PIP joints, though a few are
+              tender. The rest of the musculoskeletal examination is normal. She has no active skin
+              psoriasis but does show nail pitting in the second digits bilaterally. No
+              investigations have been done yet.
+            </p>
+            <p>
+              The clinical assessment certainly suggests nodal hand osteoarthritis. However, you are
+              not sure whether there is concomitant psoriatic arthritis, given some of her
+              inflammatory symptoms and the nail involvement alongside DIP symptoms and swelling. So
+              you decide to perform a bedside musculoskeletal ultrasound of the DIP joints.
+            </p>
+
+            <div class="step-images" style="margin-top:18px;">
+              <h3>Bedside Ultrasound — Second DIP Joint</h3>
+
+              <h4>Longitudinal</h4>
+              <div class="image-grid uniform">
+            <figure class="us-figure">
+              <img src="images/case14/Va.png" alt="Second DIP joint, longitudinal view, grey-scale" class="us-thumb">
+              <figcaption>Grey-scale</figcaption>
+            </figure>
+            <figure class="us-figure">
+              <img src="images/case14/Vb.png" alt="Second DIP joint, longitudinal view, grey-scale, during graded compression" class="us-thumb">
+              <figcaption>Grey-scale, graded compression</figcaption>
+            </figure>
+            <figure class="us-figure">
+              <img src="images/case14/Vc.png" alt="Second DIP joint, longitudinal view, power Doppler" class="us-thumb">
+              <figcaption>Power Doppler</figcaption>
+            </figure>
+              </div>
+
+              <h4>Transverse</h4>
+              <div class="image-grid uniform">
+            <figure class="us-figure">
+              <img src="images/case14/Vd.png" alt="Second DIP joint, transverse view, grey-scale" class="us-thumb">
+              <figcaption>Grey-scale</figcaption>
+            </figure>
+            <figure class="us-figure">
+              <img src="images/case14/Ve.png" alt="Second DIP joint, transverse view, grey-scale, second acquisition" class="us-thumb">
+              <figcaption>Grey-scale, second acquisition</figcaption>
+            </figure>
+            <figure class="us-figure">
+              <img src="images/case14/Vf.png" alt="Second DIP joint, transverse view, power Doppler" class="us-thumb">
+              <figcaption>Power Doppler</figcaption>
+            </figure>
+            <figure class="us-figure">
+              <img src="images/case14/Vg.png" alt="Second DIP joint, transverse view, power Doppler, second acquisition" class="us-thumb">
+              <figcaption>Power Doppler, second acquisition</figcaption>
+            </figure>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="vignette-toggle" id="vignetteToggle" onclick="toggleVignette()">Collapse</button>
+      </div>
+    </div>
+
+    <!-- ══ Q1 ═════════════════════════════════════════════════════════════ -->
+    <div class="step">
+
+      <div class="step-images">
+        <h3>Second DIP Joint — Longitudinal and Transverse</h3>
+        <div class="image-grid uniform">
+          <figure class="us-figure">
+            <img src="images/case14/Q1a.png" alt="Second DIP joint, longitudinal view, grey-scale, with arrows marking two structures" class="us-thumb">
+            <figcaption>Longitudinal, grey-scale</figcaption>
+          </figure>
+          <figure class="us-figure">
+            <img src="images/case14/Q1b.png" alt="Second DIP joint, transverse view, grey-scale, with arrows marking two structures" class="us-thumb">
+            <figcaption>Transverse, grey-scale</figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="question-block">
+        <div class="q-header">
+          <span class="q-num">Q1</span>
+          <span class="q-text">The image shows the second DIP joint. The arrows are pointing to which of the following structures?</span>
+        </div>
+
+        <div class="options">
+          <div class="option" data-val="a" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Osteophyte</span>
+          </div>
+          <div class="option" data-val="b" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Enthesophyte</span>
+          </div>
+          <div class="option" data-val="c" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Calcification</span>
+          </div>
+          <div class="option" data-val="d" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Foreign body</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          The arrows are pointing to <strong>osteophytes</strong>, which are well-defined
+          <strong>step-up bony projections that occur at the joint margins</strong>. They should not
+          be confused with enthesophytes, which are bony proliferations forming at the entheses
+          (tendon or ligament attachment on bone), arising from the cortex and visible in two
+          perpendicular planes.<br><br>
+
+          The two can be confused on ultrasound, but the terms are not interchangeable. They can
+          coexist, but sit in different locations with different characteristics. Adjacent tendon
+          pathology and hyperemia on Doppler may be present with either.<br><br>
+
+          <strong>Osteophyte</strong>
+          <ul>
+            <li>Hyperechoic bony overgrowth</li>
+            <li>Intra-articular or peri-articular location</li>
+          </ul>
+
+          <strong>Enthesophyte</strong>
+          <ul>
+            <li>Ossification within a tendon or ligament</li>
+            <li>Located at the enthesis</li>
+            <li>Linear orientation of the bony proliferation, parallel to the tendon, following the direction of pull</li>
+          </ul>
+
+          An example of an enthesophyte is shown below for comparison.
+          <div class="image-grid" style="margin-top:14px;">
+            <img src="images/case14/A1.png" alt="Enthesophyte at a DIP extensor insertion, longitudinal view, shown for comparison"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Q2 ═════════════════════════════════════════════════════════════ -->
+    <div class="step">
+
+      <div class="step-images">
+        <h3>Second DIP Joint — Longitudinal and Transverse</h3>
+        <div class="image-grid uniform">
+          <figure class="us-figure">
+            <img src="images/case14/Q2a.png" alt="Second DIP joint, longitudinal view, grey-scale, arrow at the cortical surface" class="us-thumb">
+            <figcaption>Longitudinal, grey-scale</figcaption>
+          </figure>
+          <figure class="us-figure">
+            <img src="images/case14/Q2b.png" alt="Second DIP joint, transverse view, grey-scale, arrow at the cortical surface" class="us-thumb">
+            <figcaption>Transverse, grey-scale</figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="question-block">
+        <div class="q-header">
+          <span class="q-num">Q2</span>
+          <span class="q-text">The image shows the second DIP joint. The arrow is pointing to a gap or break in the cortex. Which of the following best describes this finding?</span>
+        </div>
+
+        <div class="options">
+          <div class="option" data-val="a" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Erosion</span>
+          </div>
+          <div class="option" data-val="b" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Acoustic shadowing</span>
+          </div>
+          <div class="option" data-val="c" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Anisotropy due to probe angle</span>
+          </div>
+          <div class="option" data-val="d" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Joint space</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          The arrows are pointing to gaps in the cortex caused by <strong>acoustic shadowing</strong>
+          from the overlying osteophyte. Acoustic shadowing is a dark, signal-void area appearing
+          directly behind a dense structure. It happens when sound waves are heavily absorbed or
+          reflected by objects such as bone, calcification, or certain foreign bodies (metal),
+          preventing the ultrasound waves from imaging deeper tissue. Shadowing helps confirm the
+          presence of hard, calcified or bony pathology rather than soft tissue, but it can also
+          block the view of important structures or pathology hiding beneath a dense deposit.<br><br>
+
+          It is often confused with, or erroneously called, an erosion because of the break in the
+          cortex. However, acoustic shadowing will change or disappear with probe angle (heel-toeing,
+          for example), and you will usually find a highly reflective cortex above it — an
+          osteophyte, enthesophyte or calcification. An erosion will not usually have a hyperechoic
+          cortex above it, unless there is an overhanging edge, and it will persist despite changes
+          in probe angle in both planes. <strong>Dynamic scanning is therefore the most useful
+          differentiator.</strong>
+          <div class="image-grid" style="margin-top:14px;">
+            <img src="images/case14/A2.png" alt="Annotated second DIP joint showing acoustic shadowing deep to the osteophyte"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Q3 ═════════════════════════════════════════════════════════════ -->
+    <div class="step">
+
+      <div class="step-images">
+        <h3>Second DIP Joint — Transverse, Power Doppler</h3>
+        <div class="image-grid uniform">
+          <figure class="us-figure">
+            <img src="images/case14/Q3a.png" alt="Second DIP joint, transverse view, power Doppler, arrow marking a Doppler signal" class="us-thumb">
+            <figcaption>Transverse, power Doppler</figcaption>
+          </figure>
+          <figure class="us-figure">
+            <img src="images/case14/Q3b.png" alt="Second DIP joint, transverse view, power Doppler, during graded compression" class="us-thumb">
+            <figcaption>Transverse, power Doppler, graded compression</figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="question-block">
+        <div class="q-header">
+          <span class="q-num">Q3</span>
+          <span class="q-text">Scanning the second DIP joint in transverse, you see some Doppler signal (arrows). The Doppler disappears with mild compression. Which best describes the Doppler finding the arrows are pointing to?</span>
+        </div>
+
+        <div class="options">
+          <div class="option" data-val="a" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Synovitis in the joint</span>
+          </div>
+          <div class="option" data-val="b" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Feeding vessel</span>
+          </div>
+          <div class="option" data-val="c" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Peritenonitis around the extensor tendon</span>
+          </div>
+          <div class="option" data-val="d" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Mirror artifact</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          <strong>Mirror artifact</strong> (sometimes called Doppler reverberation artifact) is often
+          mistaken for true inflammation. It arises when the Doppler signal from a larger vessel
+          reflects off the highly reflective bony surface below, producing a false image of a vessel
+          inside or just above bone. <strong>A superficial blood vessel produces an apparent
+          duplicate Doppler signal deep to itself, which can falsely appear to represent true
+          inflammation. The color signal is not true tissue vascularity, but an artifact generated by
+          the strong Doppler signal from the overlying vessel.</strong><br><br>
+
+          <strong>The compression test</strong> (seen in the images) is the way to settle it. Apply
+          gentle pressure with the transducer to collapse the superficial vein or artery; as true
+          flow ceases, the deep Doppler artifact should disappear simultaneously. If Doppler signal
+          remains within synovial tissue or around the tendon despite collapse of the superficial
+          vessel, it is much more likely to represent true vascularity, and therefore inflammation.
+          Compress only to the point of <em>just</em> obliterating the superficial vessel — press too
+          hard on small joints and you will obliterate true synovial vascularity as well.<br><br>
+
+          This is a common pitfall for beginners scanning the MCP and PIP joints, where dorsal veins
+          overlie the joint and can create a false impression of active synovitis.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Q4 (multi-select) ══════════════════════════════════════════════ -->
+    <div class="step">
+      <div class="question-block">
+        <div class="q-header">
+          <span class="q-num">Q4</span>
+          <span class="q-text">Select all sonographic pathologies that can typically be seen in hand osteoarthritis.</span>
+        </div>
+        <p class="q-instruction">Select all correct answers.</p>
+
+        <div class="options">
+          <div class="option multi" data-val="a" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Effusions</span>
+          </div>
+          <div class="option multi" data-val="b" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Erosions</span>
+          </div>
+          <div class="option multi" data-val="c" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Osteophytes</span>
+          </div>
+          <div class="option multi" data-val="d" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Synovial hypertrophy</span>
+          </div>
+          <div class="option multi" data-val="e" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Doppler signal</span>
+          </div>
+          <div class="option multi" data-val="f" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Flexor tenosynovitis</span>
+          </div>
+          <div class="option multi" data-val="g" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Cortical irregularities</span>
+          </div>
+          <div class="option multi" data-val="h" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">Cartilage thinning</span>
+          </div>
+          <div class="option multi" data-val="i" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Peritenonitis</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          Hand osteoarthritis can show the following sonographic abnormalities.<br><br>
+
+          <strong>Bone</strong>
+          <ul>
+            <li>Cortical irregularity</li>
+            <li>Osteophytes</li>
+            <li>Erosions (erosive OA)</li>
+          </ul>
+
+          <strong>Cartilage</strong>
+          <ul>
+            <li>Thinning</li>
+            <li>Focal loss</li>
+            <li>Loss of cartilage interface sharpness (blurred superficial margin)</li>
+          </ul>
+
+          <strong>Synovium</strong>
+          <ul>
+            <li>Effusion</li>
+            <li>Hypertrophy</li>
+            <li>Doppler signal (in inflammatory OA)</li>
+            <li>Intra-articular loose bodies (often punctate hyperechoic lesions)</li>
+          </ul>
+
+          <strong>Soft tissue</strong>
+          <ul>
+            <li>Cysts (for example ganglion cysts)</li>
+            <li>Calcification</li>
+          </ul>
+
+          <strong>Peritenonitis.</strong> The finger extensor tendons do not have a true synovial
+          sheath. <strong>Peritenonitis is therefore hypoechoic swelling surrounding the extensor
+          tendon at the MCP, PIP or DIP joints, with or without power Doppler signal. The tendon
+          itself may be normal or thickened. The pathology has to be seen in two planes.</strong>
+          Although there is some evidence that peritenonitis can be seen in osteoarthritis, it is
+          more classically associated with PsA or SpA.
+          <div class="image-grid" style="margin-top:14px;">
+            <img src="images/case14/A4a.png" alt="Peritenonitis surrounding an extensor tendon"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          </div>
+          <br>
+
+          <strong>Flexor tenosynovitis</strong> is hypoechoic or anechoic thickened tissue, with or
+          without fluid, within the tendon sheath, seen in two perpendicular planes and possibly
+          exhibiting power Doppler signal. It is associated more with inflammatory etiologies (RA,
+          PsA, crystal flares, infectious tenosynovitis), and can be seen in stenosing or overuse
+          tenosynovitis (trigger finger). It is uncommon in OA — and if you see flexor tenosynovitis,
+          especially in multiple fingers, your suspicion of inflammatory pathology should be higher.
+          <div class="image-grid" style="margin-top:14px;">
+            <img src="images/case14/A4b.png" alt="Flexor tenosynovitis within the tendon sheath"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Q5 ═════════════════════════════════════════════════════════════ -->
+    <div class="step">
+      <div class="question-block">
+        <div class="new-info">
+          <span class="ni-label">On Review</span>
+          <p>
+            You have already seen the changes at the DIP joints. Ultrasound of the MCP joints, PIP
+            joints and flexor tendons is normal. You are more confident now that this is all
+            osteoarthritis — but since you are just beginning to do MSK ultrasound, you still wonder
+            whether the changes at the DIP joint could be enthesitis.
+          </p>
+        </div>
+
+        <div class="q-header">
+          <span class="q-num">Q5</span>
+          <span class="q-text">Which of the following investigations would be most helpful in providing further clarity?</span>
+        </div>
+
+        <div class="options">
+          <div class="option" data-val="a" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">Formal ultrasound by radiology</span>
+          </div>
+          <div class="option" data-val="b" data-correct="true">
+            <div class="option-marker"></div>
+            <span class="option-text">X-rays</span>
+          </div>
+          <div class="option" data-val="c" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">MRI</span>
+          </div>
+          <div class="option" data-val="d" data-correct="false">
+            <div class="option-marker"></div>
+            <span class="option-text">HLA-B27</span>
+          </div>
+        </div>
+
+        <div class="explanation">
+          X-rays are always helpful to obtain alongside ultrasound to help confirm any bony
+          pathology. They can add confidence to your ultrasound findings and demonstrate pathology
+          that may have been missed. Bedside ultrasound is one piece of the puzzle in making a
+          diagnosis, and always has to be taken in clinical context alongside other
+          investigations.
+          <div class="image-grid" style="margin-top:14px;">
+            <img src="images/case14/A5.jpg" alt="Hand radiograph showing osteoarthritic change at the DIP joints"
+                 class="us-thumb" style="width:100%; border-radius:8px; max-height:280px; object-fit:contain;">
+          </div>
+          <br>
+
+          In this case the X-rays clearly show findings of osteoarthritis at the DIP joints, with no
+          features of psoriatic arthritis. With a low pre-test probability of PsA or inflammatory
+          arthritis based on the clinical presentation, examination and bedside MSK ultrasound, the
+          X-ray is the best low-cost, rapid test to add to your clinical and sonographic
+          diagnosis.<br><br>
+
+          A formal ultrasound is helpful when starting out with bedside MSK ultrasound in moderate
+          or higher pre-test probability situations, to get confirmation and increase confidence in
+          your interpretation. An MRI is unnecessary here and is not Choosing Wisely for this
+          clinical presentation. An HLA-B27 will not change diagnosis or management — even if it
+          were positive given her history of psoriasis, the clinical, radiographic and sonographic
+          findings point more towards OA. The X-ray is therefore the most helpful in confirming your
+          bedside diagnosis.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ NAVIGATION & RESULT (leave as-is in every case) ═════════════════ -->
+    <div class="step-nav" id="stepNav">
+      <span class="nav-warning" id="navWarning">Please answer the question before continuing.</span>
+      <button class="next-btn" id="nextBtn" onclick="nextStep()">Next →</button>
+    </div>
+
+    <div id="finalResult">
+      <div class="score-big" id="scoreBig">—</div>
+      <div class="score-label">Your score for this case</div>
+      <div class="final-explanation">
+        <strong>Summary:</strong> Nodal hand osteoarthritis and psoriatic arthritis meet at the DIP
+        joint, and in a patient with psoriasis the temptation is to read every finding as
+        inflammatory. Here the scan argues the other way. The bony projections at the joint margins
+        are <strong>osteophytes</strong>, not enthesophytes — the two differ in location and
+        orientation, and an enthesophyte runs parallel to the tendon along the line of pull. The
+        apparent cortical break is <strong>acoustic shadowing</strong> from the overlying osteophyte,
+        not an erosion; it moves with probe angle, whereas an erosion persists in two planes. The
+        Doppler signal is a <strong>mirror artifact</strong> from an overlying dorsal vessel, and the
+        compression test proves it by extinguishing both signals together. Hand OA can show
+        effusions, synovial hypertrophy, Doppler signal, osteophytes, cortical irregularity, erosions
+        and cartilage thinning — but <strong>flexor tenosynovitis</strong>, particularly in several
+        fingers, should push you towards inflammatory disease instead. Finally, an X-ray is the
+        cheap, fast test that confirms the bony picture: bedside ultrasound is one piece of the
+        puzzle, never the whole of it.
+      </div>
+      <button class="retry-btn" onclick="retryCase()">↻ Retry Case</button>
+      <button class="back-btn"  onclick="goBack()">← Back to Cases</button>
+    </div>
+
+    <!-- Provenance line. Filled in by the engine from the `developed` field in
+         rheumwave-cases.js. Leave it empty and hidden. -->
+    <p class="case-credit" id="caseCredit" style="display:none;"></p>
+
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <div class="footer-grid">
+
+        <div>
+          <a class="footer-brand" href="../index.html">
+            <img src="../RheumWave Logo.png" alt="">
+            <strong>RheumWave</strong>
+          </a>
+          <p class="footer-about">
+            Case-based teaching for musculoskeletal ultrasound in rheumatology, built for trainees
+            and early-career rheumatologists.
+          </p>
+          <a class="footer-contact" href="../contact.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>
+            </svg>
+            Get in touch
+          </a>
+        </div>
+
+        <div class="footer-col">
+          <h5>Learn</h5>
+          <ul>
+            <li><a href="../cases.html">Cases</a></li>
+            <li><a href="../quizzes.html">Quizzes</a></li>
+            <li><a href="../resources.html">Resources</a></li>
+            <li><a href="../index.html#how-it-works">How it works</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>About</h5>
+          <ul>
+            <li><a href="../about.html">About RheumWave</a></li>
+            <li><a href="../contact.html">Contact</a></li>
+            <li><a href="../disclaimer.html">Disclaimer</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <span>© <span id="year"></span> RheumWave. All rights reserved.</span>
+        <span>For education only — not a substitute for clinical judgment. <a href="../disclaimer.html">Read the full disclaimer</a>.</span>
+      </div>
+    </div>
+  </footer>
+  <div id="syncStatus"></div>
+
+  <div id="usLightbox" onclick="closeLightbox(event)">
+    <button id="usLightboxClose" onclick="closeLightbox(event)" aria-label="Close">&times;</button>
+    <img id="usLightboxImg" src="" alt="">
+    <div id="usLightboxCaption"></div>
+  </div>
+
+  <!-- ══ THE ONLY LINE TO CHANGE PER CASE ═══════════════════════════════════
+       Must match the id in rheumwave-cases.js. It is the key every score is
+       filed under, so never change it once a case has been attempted. -->
+  <script>window.RW_CASE_ID = 14;</script>
+
+  <script>
+    (function () {
+      var up = window.RW_UP || '';
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-config.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-cases.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-sync.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-ui.js"><\/scr' + 'ipt>');
+      document.write('<scr' + 'ipt src="' + up + 'rheumwave-case-engine.js"><\/scr' + 'ipt>');
+    })();
+  </script>
+
+</body>
+</html>
