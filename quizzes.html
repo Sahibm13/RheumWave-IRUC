@@ -208,10 +208,10 @@
         <div class="id-section">
           <label for="participantInput">Participant ID</label>
           <div class="id-input-row">
-            <input type="text" id="participantInput" placeholder="e.g. RW-013" autocomplete="off" />
+            <input type="text" id="participantInput" placeholder="e.g. RW-1329" autocomplete="off" />
             <button id="verifyBtn" onclick="verifyParticipant()">Login</button>
           </div>
-          <div id="idFeedback" class="info">Enter your ID to save scores and metrics to the study.</div>
+          <div id="idFeedback" class="info">Enter your ID to save scores and metrics.</div>
         </div>
 
         <div class="switch-mode" id="toCreateRow">
@@ -224,7 +224,7 @@
         </div>
 
         <p class="intro-note" id="signInNote">
-          Study participants have quiz scores and metrics securely saved. Create your ID with your study coordinator present.
+          Study participants have quiz scores and metrics securely saved.
         </p>
       </div>
 
@@ -233,15 +233,16 @@
         <div class="id-section">
           <label for="newIdInput">Choose your participant ID</label>
           <div class="id-input-row">
-            <input type="text" id="newIdInput" placeholder="e.g. RW-013" autocomplete="off" />
+            <input type="text" id="newIdInput" placeholder="e.g. RW-1329" autocomplete="off" />
             <button id="createBtn" onclick="createParticipant()">Create ID</button>
           </div>
-          <div id="createFeedback" class="info">Do this with your study coordinator present.</div>
+          <div id="createFeedback" class="info"></div>
           <div class="id-rules">
             Your ID must be:
             <ul>
               <li>4 to 12 characters long</li>
               <li>Letters, numbers and hyphens only</li>
+              <li>e.g. RW-1329 (last 4 digits of phone number is easiest to remember)</li>
               <li>Not something that identifies you — no name, no birthdate</li>
             </ul>
           </div>
@@ -469,7 +470,7 @@
       document.getElementById('newIdInput').value = '';
       document.getElementById('newIdInput').classList.remove('error');
       const fb = document.getElementById('createFeedback');
-      fb.className = 'info'; fb.textContent = 'Do this with your study coordinator present.';
+      fb.className = 'info'; fb.textContent = '';
       showPanel('panelCreate');
       document.getElementById('newIdInput').focus();
     }
@@ -484,7 +485,7 @@
         document.getElementById('introSubtitle').textContent =
           'Enter your participant ID to continue, or create one if this is your first visit.';
         document.getElementById('signInNote').textContent =
-          'Access is limited to study participants. Quiz scores and metrics are securely saved against your ID.';
+          'Quiz scores and metrics are securely saved against your ID.';
       }
     }
     applyAccessSwitches();
@@ -504,7 +505,7 @@
       const banner = document.getElementById('sessionBanner');
       if (type === 'participant') {
         banner.classList.add('visible');
-        document.getElementById('bannerText').textContent = `Signed in as ${id} — scores are being saved to the study.`;
+        document.getElementById('bannerText').textContent = `Signed in as ${id} — scores are being saved.`;
       } else {
         banner.classList.remove('visible');
       }
