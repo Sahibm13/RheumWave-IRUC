@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pre-Quiz | RheumWave</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Same stylesheets a case page loads, minus the header/footer chrome.
+       rheumwave-case.css is what makes the vignette, image panels, question
+       boxes and options look exactly like a case. rheumwave-chrome.css is
+       deliberately left out: like quizzes.html, this page gives a participant
+       part-way through the study nowhere to wander off to. -->
+  <link rel="stylesheet" href="../rheumwave-theme.css">
+  <link rel="stylesheet" href="../rheumwave-case.css">
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════════════
+       QUIZ-ONLY STYLES
+       Everything else is inherited from the case stylesheet above.
+       ═══════════════════════════════════════════════════════════════════════ */
+
+    body { visibility: hidden; }          /* revealed by the gate; see script */
+    body.gate-passed { visibility: visible; }
+
+    /* ── THE ANSWER-REVEAL GUARD ──
+       rheumwave-case.css paints .correct, .incorrect and .revealed green and
+       red, because a case shows its answers at the end. This quiz must never
+       do that. Nothing in this page's script adds those classes — but if a
+       future edit ever did, by accident or by copying a line out of the case
+       engine, these rules make sure it still shows the participant nothing.
+       Belt and braces on the one thing that would spoil the measurement. */
+    .option.correct, .option.incorrect, .option.revealed {
+      border-color: var(--border-strong) !important;
+      background: var(--bg) !important;
+    }
+    .option.correct .option-marker,
+    .option.incorrect .option-marker,
+    .option.revealed .option-marker {
+      border-color: var(--border-strong) !important;
+      background: transparent !important;
+      color: transparent !important;
+    }
+    .explanation { display: none !important; }
+
+    /* ── THE COUNTDOWN BAR ──
+       Sits above everything and stays put while the page scrolls, so the time
+       left is always visible without hunting for it. */
+    #timerBar {
+      position: sticky; top: 0; z-index: 90;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 10px rgba(30,58,95,.06);
+      display: none;
+    }
+    body.in-progress #timerBar { display: block; }
+    .timer-inner {
+      max-width: 860px; margin: 0 auto;
+      padding: 10px 24px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .timer-clock {
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum";
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--ink);
+      display: flex; align-items: center; gap: 8px;
+      white-space: nowrap;
+    }
+    .timer-clock svg { opacity: .55; }
+    .timer-clock.warn   { color: #b45309; }
+    .timer-clock.urgent { color: #dc2626; }
+    [data-theme="dark"] .timer-clock.warn   { color: #fbbf24; }
+    [data-theme="dark"] .timer-clock.urgent { color: #fca5a5; }
+    .timer-answered { font-size: .8rem; color: var(--ink-3); margin-left: auto; white-space: nowrap; }
+    .timer-track { height: 4px; background: var(--surface-2); border-radius: 99px; overflow: hidden; flex: 1; min-width: 60px; }
+    .timer-fill  { height: 100%; width: 100%; background: linear-gradient(90deg, var(--navy), var(--teal)); border-radius: 99px; transition: width 1s linear; }
+    .timer-fill.warn   { background: #d97706; }
+    .timer-fill.urgent { background: #dc2626; }
+
+    @media (max-width: 620px) {
+      .timer-inner { padding: 9px 16px; gap: 10px; }
+      .timer-track { display: none; }
+    }
+
+    /* ── ONE QUESTION, ONE CARD ──
+       A case page shows its images in a card of their own, above the question,
+       because only one question is on screen at a time so there is nothing to
+       confuse them with. Here everything scrolls past together, and a separate
+       card left each image sitting equidistant between two questions.
+
+       So the images live inside the question box instead, in reading order:
+       the vignette, then the scan, then the options. That is the order the
+       participant needs — the history is what tells them what they are looking
+       for — and it removes the guesswork entirely, since a question and its
+       images are now literally the same card. */
+    .q-media-inline { margin: 0 0 16px; }
+    .q-media-inline h4 {
+      font-size: .74rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--ink-3); margin: 0 0 10px;
+    }
+
+    /* Generous separation between one question and the next, now that each
+       card holds everything belonging to it. */
+    #quizBody .question-block { margin-bottom: 36px !important; }
+    #demoBody .question-block { margin-bottom: 16px !important; }
+
+    /* The a / b / c label under each image of a multi-image question. */
+    .img-label {
+      display: inline-block;
+      background: var(--navy);
+      color: #fff;
+      font-size: .68rem;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 20px;
+      margin-right: 2px;
+      letter-spacing: .02em;
+    }
+    [data-theme="dark"] .img-label { background: var(--teal); }
+
+    /* ── STEPPING BETWEEN A QUESTION'S IMAGES ──
+       Hidden unless the question has more than one, so a single-image question
+       looks exactly as it did. Large tap targets, because this gets used on a
+       phone under time pressure. */
+    .lb-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,.12); color: #fff; border: none;
+      width: 52px; height: 52px; border-radius: 50%;
+      font-size: 2rem; line-height: 1; cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      font-family: inherit; padding: 0 0 4px;
+      transition: background .15s;
+    }
+    #usLightbox.has-nav .lb-nav { display: flex; }
+    .lb-nav:hover { background: rgba(255,255,255,.26); }
+    .lb-prev { left: 16px; }
+    .lb-next { right: 16px; }
+    @media (max-width: 640px) {
+      .lb-nav { width: 44px; height: 44px; font-size: 1.6rem; }
+      .lb-prev { left: 6px; }
+      .lb-next { right: 6px; }
+    }
+
+    /* ── PANELS (intro, submitted, blocked) ── */
+    .panel {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 30px 30px;
+      box-shadow: var(--shadow);
+    }
+    .panel.active { display: block; }
+    .panel h1 {
+      font-family: 'Source Serif 4', serif; font-size: 1.6rem; font-weight: 600;
+      color: var(--heading); margin: 0 0 14px; letter-spacing: -0.02em; line-height: 1.2;
+    }
+    .panel p  { font-size: .93rem; line-height: 1.7; color: var(--ink-2); margin: 0 0 14px; }
+    .panel ul { font-size: .93rem; line-height: 1.75; color: var(--ink-2); margin: 0 0 18px; padding-left: 20px; }
+    .panel li { margin-bottom: 7px; }
+
+    .stage { display: none; }
+    .stage.active { display: block; }
+
+    /* ── UNANSWERED FLAG ──
+       Neutral, not red: it marks a gap, it says nothing about correctness. */
+    .question-block.unanswered { border-color: #d97706; }
+    [data-theme="dark"] .question-block.unanswered { border-color: #b45309; }
+    .q-flag {
+      display: none;
+      font-size: .78rem; font-weight: 600; color: #b45309;
+      margin-top: 12px;
+    }
+    [data-theme="dark"] .q-flag { color: #fbbf24; }
+    .question-block.unanswered .q-flag { display: block; }
+
+    /* ── SUBMIT ── */
+    .submit-panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px 26px; margin-top: 26px;
+      box-shadow: var(--shadow); text-align: center;
+    }
+    .submit-panel .submit-lead { font-size: .88rem; color: var(--ink-2); margin: 0 0 16px; line-height: 1.65; }
+    .big-submit {
+      background: var(--navy); color: #fff; border: none;
+      padding: 12px 34px; border-radius: 8px;
+      font-size: .95rem; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: opacity .2s;
+    }
+    .big-submit:hover:not(:disabled) { opacity: .88; }
+    .big-submit:disabled { opacity: .45; cursor: not-allowed; }
+    [data-theme="dark"] .big-submit { background: var(--teal); }
+
+    .notice {
+      border-radius: 9px; padding: 13px 16px; font-size: .86rem; line-height: 1.65;
+      margin: 0 0 18px; border: 1px solid; text-align: left;
+    }
+    .notice.warn { background: #fef3c7; border-color: #fcd34d; color: #78350f; }
+    .notice.err  { background: #fee2e2; border-color: #fca5a5; color: #7f1d1d; }
+    [data-theme="dark"] .notice.warn { background: #2d1f06; border-color: #78350f; color: #fbbf24; }
+    [data-theme="dark"] .notice.err  { background: #2c1111; border-color: #7f1d1d; color: #fca5a5; }
+
+    .score-big-q {
+      font-family: 'Source Serif 4', serif; font-size: 3rem; font-weight: 600;
+      color: var(--heading); line-height: 1; margin: 8px 0 4px;
+    }
+    .score-sub { font-size: .87rem; color: var(--ink-3); margin-bottom: 20px; }
+
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+
+    .page-credit {
+      text-align: center; padding: 26px 20px 0; margin-top: 44px;
+      color: var(--ink-3); font-size: .78rem; border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 640px) {
+      .panel { padding: 22px 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .timer-fill { transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ COUNTDOWN ═══════════════════════════════════════════════════════ -->
+  <div id="timerBar">
+    <div class="timer-inner">
+      <span class="timer-clock" id="timerClock">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M7.5 1a6.5 6.5 0 1 0 0 13A6.5 6.5 0 0 0 7.5 1zm0 3v4l2.5 1.5" stroke-linecap="round"/>
+        </svg>
+        <span id="timerText">—</span>
+      </span>
+      <div class="timer-track"><div class="timer-fill" id="timerFill"></div></div>
+      <span class="timer-answered" id="timerAnswered"></span>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- ══ STAGE 1 — BEFORE STARTING ═════════════════════════════════════ -->
+    <div class="stage active" id="stageIntro">
+      <div class="panel active">
+        <p class="case-num" id="introLabel">Assessment</p>
+        <h1 id="introTitle">Pre-Quiz</h1>
+        <p>This 20-question quiz is designed to assess your current knowledge and
+           interpretation of musculoskeletal ultrasound (MSKUS) findings encountered in
+           rheumatology practice. Results will help us evaluate MSKUS education through
+           CRUS, identify areas where additional teaching may be helpful, help develop
+           resources, and assess changes in knowledge over time.</p>
+        <p>Your responses are anonymous and will be pooled. They will <strong>not</strong>
+           be used to determine successful completion or certification of the CRUS course
+           or otherwise affect your training. Anonymized data <em>may</em> also be used for
+           research and scholarly evaluation of MSKUS education in the future.</p>
+        <ul>
+          <li>First you will answer 7 short questions about yourself. Those are <strong>not</strong> counted towards your time.</li>
+          <li id="introTimeLine">The quiz itself is timed.</li>
+          <li>Please complete it independently and to the best of your current knowledge.
+              Please do <strong>not</strong> use any resources or AI to assist you.</li>
+          <li>Every question is on one page. Answer in any order and submit at the bottom.</li>
+          <li>You will <strong>not</strong> be told whether an answer is right as you go, and the correct answers are not shown afterward.</li>
+          <li>You may sit this quiz <strong>once</strong>. There is no retry.</li>
+          <li>If the page closes by accident, reopen it with the same participant ID — your answers come back and the clock carries on from when you started, so do not leave it open and walk away.</li>
+        </ul>
+        <div id="introNotice"></div>
+        <div class="btn-row">
+          <button class="big-submit" id="startBtn" onclick="startQuiz()">Start</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STAGE 1b — DEMOGRAPHICS (untimed) ═════════════════════════════ -->
+    <div class="stage" id="stageDemographics">
+      <div class="case-header">
+        <p class="case-num">Before we begin</p>
+        <h2>About you</h2>
+      </div>
+      <div class="vignette" style="margin-bottom:24px;">
+        <p>These 7 questions are <strong>not</strong> counted towards your
+           <span class="mins-label">time</span>. The clock starts when you
+           continue to the quiz.</p>
+      </div>
+
+      <div id="demoBody"></div>
+
+      <div class="submit-panel">
+        <div id="demoNotice"></div>
+        <p class="submit-lead" id="demoLead">Answer all 7 to continue.</p>
+        <button class="big-submit" id="demoContinueBtn" onclick="beginTimedSection()">
+          Continue to the quiz — starts the clock
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ STAGE 2 — THE QUIZ ════════════════════════════════════════════ -->
+    <div class="stage" id="stageQuiz">
+
+      <div class="case-header">
+        <p class="case-num" id="quizLabel">Assessment</p>
+        <h2 id="quizHeading">Quiz 1</h2>
+      </div>
+
+      <!-- Optional shared vignette, filled from QUIZ_VIGNETTE below. Hidden
+           entirely when that is left null. -->
+      <div class="vignette" id="quizVignette" style="display:none;"></div>
+
+      <!-- Every question is written here by renderAll() -->
+      <div id="quizBody"></div>
+
+      <div class="submit-panel">
+        <div id="submitNotice"></div>
+        <p class="submit-lead" id="submitLead">Check you are happy with your answers before submitting.</p>
+        <button class="big-submit" id="submitBtn" onclick="submitQuiz()">Submit my answers</button>
+      </div>
+    </div>
+
+    <!-- ══ STAGE 3 — SUBMITTED ═══════════════════════════════════════════ -->
+    <div class="stage" id="stageDone">
+      <div class="panel active">
+        <h1 id="doneTitle">Submitted</h1>
+        <div id="doneNotice"></div>
+        <p id="doneLead">Thank you — your answers have been recorded against your participant ID.</p>
+        <div id="scoreBlock" style="display:none;">
+          <div class="score-big-q" id="scoreBig">—</div>
+          <div class="score-sub" id="scoreSub"></div>
+        </div>
+        <p>Correct answers are not shown, so that the quiz stays a fair measure for everyone taking part.</p>
+        <div class="btn-row">
+          <a class="btn" href="../quizzes.html">Back to Quizzes</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STAGE 4 — CANNOT PROCEED ══════════════════════════════════════ -->
+    <div class="stage" id="stageBlocked">
+      <div class="panel active">
+        <h1 id="blockedTitle">This quiz is closed</h1>
+        <p id="blockedBody"></p>
+        <div class="btn-row">
+          <a class="btn secondary" href="../quizzes.html">Back to quizzes</a>
+        </div>
+      </div>
+    </div>
+
+    <p class="page-credit">© <span id="year"></span> RheumWave. For education only — not a substitute for clinical judgment.</p>
+  </div>
+
+  <!-- ══ LIGHTBOX (same markup and ids the case pages use) ═══════════════ -->
+  <div id="usLightbox" onclick="closeLightbox(event)">
+    <button id="usLightboxClose" onclick="closeLightbox(event)" aria-label="Close">&times;</button>
+    <button class="lb-nav lb-prev" id="lbPrev" onclick="lightboxStep(-1, event)" aria-label="Previous image">&#8249;</button>
+    <img id="usLightboxImg" src="" alt="">
+    <button class="lb-nav lb-next" id="lbNext" onclick="lightboxStep(1, event)" aria-label="Next image">&#8250;</button>
+    <div id="usLightboxCaption"></div>
+  </div>
+
+<script src="../rheumwave-config.js"></script>
+<script src="../rheumwave-ui.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   QUIZ 1
+   ---------------------------------------------------------------------------
+   HOW THIS PAGE DIFFERS FROM A CASE PAGE
+
+   It looks like a case and the images, vignette and options behave the same
+   way. Three things are different, and all three are deliberate:
+
+     1. It does not hold the answer key. A case page carries data-correct on
+        every option and marks the attempt in the browser. This page knows the
+        questions and the options and nothing else. Marking happens in Supabase,
+        in submit_quiz(), against a table the website cannot read.
+
+     2. Nothing is revealed. No explanations, no ticks, no Retry.
+
+     3. It is timed, and the clock is the server's. start_quiz_attempt() returns
+        how many seconds are left, worked out from the stored start time, so a
+        reload resumes the same countdown instead of granting fresh time. When
+        it reaches zero the page submits whatever has been answered.
+
+   WHAT TO EDIT WHEN YOU ADD REAL QUESTIONS
+   The QUIZ_VIGNETTE and QUIZ_ITEMS blocks below, and the matching rows in the
+   quiz_items table in Supabase. The item ids and option values must match in
+   both places, or a question answered correctly will be marked wrong.
+
+   The time limit is NOT here — it lives in the quiz_settings table, so it can
+   be changed without touching this file.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── SETTINGS ───────────────────────────────────────────────────────────── */
+
+const QUIZ_ID    = 'quiz01';          // must match quiz_items.quiz_id in Supabase
+const QUIZ_TITLE = 'Pre-Quiz';
+
+// true shows the participant their percentage after submitting; false shows
+// only a confirmation. Correct answers are never shown either way.
+const SHOW_SCORE_ON_SUBMIT = true;
+
+// The saved-progress key. Like your other storage keys, this becomes FROZEN
+// once data collection starts — renaming it strands any half-finished attempt.
+const QUIZ_STATE_KEY = 'rheumwave-quiz-' + QUIZ_ID;
+
+// Where a finished-but-unsent submission waits for the connection to return.
+// Also frozen once data collection starts, for the same reason.
+const QUIZ_OUTBOX_KEY = 'rheumwave-quiz-outbox-' + QUIZ_ID;
+
+
+/* ── THE VIGNETTE ───────────────────────────────────────────────────────────
+   One shared clinical scenario shown above every question, in the same box a
+   case uses. Set it to null if the questions are unrelated to each other.
+   HTML is allowed here: use <p> for each paragraph.               */
+
+const QUIZ_VIGNETTE = null;
+// e.g. QUIZ_VIGNETTE = '<p>A 54-year-old woman presents with …</p>';
+
+
+/* ── THE QUESTIONS ──────────────────────────────────────────────────────────
+   id       matches item_id in the quiz_items table. Keep it opaque (q1, q2 …)
+            so nothing in the page names the pathology.
+   text     the question itself.
+   multi    true if more than one option is correct. Marking is all-or-nothing:
+            every correct option and nothing else.
+   info     optional. Shown in the teal "new information" box at the top of the
+            question, exactly as in a case.
+   media    optional. An array of images and cine clips shown inside the
+            question card, between the stem and the options — so the history
+            frames what the participant is looking for, and an image can never
+            be mistaken for the neighbouring question's:
+              { type: 'image', src: 'images/quiz01/Q1a.jpg', caption: '…' }
+              { type: 'video', src: 'images/quiz01/V1.mp4',  caption: '…' }
+            Path convention, matching the cases: quizzes/images/quiz01/ with
+            opaque filenames — no descriptive tails, which are readable in the
+            page source and give the finding away.
+            Where a question has more than one image they are lettered a, b,
+            c… automatically, matching how the source document names them.
+            CAPTIONS are participant-facing and also become the lightbox
+            caption: probe position, joint, plane and mode ONLY, never the
+            finding. Unlike a case there are no answer images, because nothing
+            is revealed.
+   heading  optional heading for the image panel.
+   options  val must match the letters in the Supabase answer key.
+
+   The 20 questions below are transcribed from Pre-Quiz_Pathology.docx. The
+   stems and options are verbatim; only the image captions are still TODO.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── THE DEMOGRAPHIC QUESTIONS ──────────────────────────────────────────────
+   Asked before the quiz and NOT counted towards the time limit — the clock
+   only starts when the participant leaves this section. They are stored on the
+   attempt and never marked: they are not rows in quiz_items, so they cannot
+   touch the score.
+
+   Taken verbatim from Pre-Quiz_Pathology.docx.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+const DEMOGRAPHIC_ITEMS = [
+  {
+    id: 'd1',
+    text: 'Which best describes your specialty or area of work?',
+    multi: false,
+    options: [
+      { val: 'a', text: 'Rheumatology' },
+      { val: 'b', text: 'Physiatry' },
+      { val: 'c', text: 'Family Medicine' },
+      { val: 'd', text: 'Internal Medicine' },
+      { val: 'e', text: 'Physiotherapist or Occupational therapist' },
+      { val: 'f', text: 'Researcher' },
+      { val: 'g', text: 'Other' },
+    ]
+  },
+  {
+    id: 'd2',
+    text: 'Which best describes your career stage?',
+    multi: false,
+    options: [
+      { val: 'a', text: 'Medical student' },
+      { val: 'b', text: 'Resident' },
+      { val: 'c', text: 'Rheumatology Fellow (e.g. Rheumatology PGY4-5 or Clinical Fellow)' },
+      { val: 'd', text: 'Rheumatologist <2 years' },
+      { val: 'e', text: 'Rheumatologist >2 years' },
+      { val: 'f', text: 'Other specialty independent MD' },
+      { val: 'g', text: 'ACPAC / PT / OT' },
+      { val: 'h', text: 'Research trainee or scientist' },
+    ]
+  },
+  {
+    id: 'd3',
+    text: 'What is your prior formal training in MSKUS?',
+    multi: false,
+    options: [
+      { val: 'a', text: 'None' },
+      { val: 'b', text: 'Curriculum within training program (e.g. residency)' },
+      { val: 'c', text: 'CRUS Basic Course' },
+      { val: 'd', text: 'Other Basic Course (USSONAR, EULAR)' },
+      { val: 'e', text: 'Advanced MSKUS course or certification (USSONAR, ACR, EULAR)' },
+    ]
+  },
+  {
+    id: 'd4',
+    text: 'Years of MSKUS experience after MSKUS course (if applicable)',
+    multi: false,
+    options: [
+      { val: 'a', text: 'None' },
+      { val: 'b', text: '<1 year' },
+      { val: 'c', text: '1-2 years' },
+      { val: 'd', text: '3-5 years' },
+      { val: 'e', text: '>5 years' },
+    ]
+  },
+  {
+    id: 'd5',
+    text: 'Have you previously completed the CRUS Basic Course?',
+    multi: false,
+    options: [
+      { val: 'a', text: 'No' },
+      { val: 'b', text: 'Yes, within the past 2 years' },
+      { val: 'c', text: 'Yes, >2 years ago' },
+    ]
+  },
+  {
+    id: 'd6',
+    text: 'Current MSKUS use in clinical practice',
+    multi: false,
+    options: [
+      { val: 'a', text: 'None' },
+      { val: 'b', text: 'Occasionally (<monthly)' },
+      { val: 'c', text: 'Monthly' },
+      { val: 'd', text: 'Weekly' },
+      { val: 'e', text: 'Most clinical days' },
+    ]
+  },
+  {
+    id: 'd7',
+    text: 'Province of training/practice currently',
+    multi: false,
+    options: [
+      { val: 'a', text: 'British Columbia' },
+      { val: 'b', text: 'Alberta' },
+      { val: 'c', text: 'Saskatchewan' },
+      { val: 'd', text: 'Manitoba' },
+      { val: 'e', text: 'Ontario' },
+      { val: 'f', text: 'Quebec' },
+      { val: 'g', text: 'Atlantic provinces' },
+      { val: 'h', text: 'Territories' },
+    ]
+  }
+];
+
+
+const QUIZ_ITEMS = [
+  {
+    id: 'q1',
+    text: 'A 53-year-old male has recurrent episodes of knee pain and swelling that '
+          + 'resolve with NSAIDs. Which of the following is the most accurate '
+          + 'interpretation of the ultrasound images?',
+    multi: false,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q1a.jpg',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q1b.jpg',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Double contour sign' },
+      { val: 'b', text: 'Pseudo-double contour' },
+      { val: 'c', text: 'Interface sign' },
+      { val: 'd', text: 'Chondrosis' },
+    ]
+  },
+  {
+    id: 'q2',
+    text: 'A 53-year-old perimenopausal female with psoriasis has migratory wrist and '
+          + 'hand arthralgias with normal X-rays and bloodwork. Which of the following is '
+          + 'the most accurate interpretation of the wrist ultrasound?',
+    multi: false,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q2a.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q2b.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Tenosynovitis of extensor tendon of wrist' },
+      { val: 'b', text: 'Erosion at the capitate' },
+      { val: 'c', text: 'Normal' },
+      { val: 'd', text: 'Crystal deposition at radiocarpal joint' },
+    ]
+  },
+  {
+    id: 'q3',
+    text: 'You scan the finger flexor tendons of a 30-year-old female with inflammatory '
+          + 'hand symptoms who is RF and anti-CCP positive. What is the most accurate '
+          + 'interpretation of the finding indicated by the arrow?',
+    multi: false,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q3.jpg',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Anisotropy' },
+      { val: 'b', text: 'Flexor tenosynovitis' },
+      { val: 'c', text: 'Joint effusion on volar MCP' },
+      { val: 'd', text: 'Normal' },
+    ]
+  },
+  {
+    id: 'q4',
+    text: 'A 55-year-old female has bilateral forefoot pain with no clinical synovitis '
+          + 'and normal serology and X-rays. Her mother had rheumatoid arthritis and she is '
+          + 'concerned she is developing the same. Which of the following is the most '
+          + 'accurate interpretation of the ultrasound images?',
+    multi: false,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q4a.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q4b.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q4c.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q4d.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Subtle inflammation suggesting subclinical synovitis (consistent with early RA)' },
+      { val: 'b', text: 'Small effusions but no signs of inflammation (seen in normal population)' },
+      { val: 'c', text: 'Degenerative changes with effusions (Osteoarthritis)' },
+      { val: 'd', text: 'Double contour with effusions (consistent with likely gout)' },
+    ]
+  },
+  {
+    id: 'q5',
+    text: 'The DUET scoring system was recently developed to identify inflammatory '
+          + 'enthesitis in psoriatic arthritis (PsA). Which entheseal sites are included in '
+          + 'the DUET score? Select all that apply.',
+    multi: true,
+    media: [],
+    options: [
+      { val: 'a', text: 'Supraspinatus insertion' },
+      { val: 'b', text: 'Triceps insertion' },
+      { val: 'c', text: 'Lateral epicondyle' },
+      { val: 'd', text: 'Quadriceps tendon insertion' },
+      { val: 'e', text: 'Patellar tendon insertion into patella' },
+      { val: 'f', text: 'Patellar tendon insertion into tibia' },
+      { val: 'g', text: 'Achilles insertion into calcaneus' },
+      { val: 'h', text: 'Plantar fascia' },
+    ]
+  },
+  {
+    id: 'q6',
+    text: 'You scan the triceps insertion in a patient with entheseal pain and '
+          + 'tenderness. Which elementary lesions are present on the images shown? Select '
+          + 'all that apply.',
+    multi: true,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q6a.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q6b.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q6c.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Enthesophyte' },
+      { val: 'b', text: 'Calcification' },
+      { val: 'c', text: 'Erosions' },
+      { val: 'd', text: 'Thickening' },
+      { val: 'e', text: 'Hypoechogenicity' },
+      { val: 'f', text: 'Power doppler' },
+    ]
+  },
+  {
+    id: 'q7',
+    text: 'A 65-year-old female with psoriasis has finger pain and clinically apparent '
+          + 'nodal OA at the PIPs and DIPs. However, they feel swollen and boggy. Given her '
+          + 'psoriasis, you do bedside MSKUS.  The arrows on the 2nd DIP ultrasound are '
+          + 'pointing to which structure?',
+    multi: false,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q7a.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q7b.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Osteophyte' },
+      { val: 'b', text: 'Calcification' },
+      { val: 'c', text: 'Enthesophyte' },
+      { val: 'd', text: 'Foreign body' },
+    ]
+  },
+  {
+    id: 'q8',
+    text: 'The image shows the 2nd DIP joint from the same patient. The arrow points to '
+          + 'an apparent gap in the cortex. What best describes this finding?',
+    multi: false,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q8A.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q8B.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Erosion' },
+      { val: 'b', text: 'Acoustic shadowing' },
+      { val: 'c', text: 'Anisotropy due to probe angle' },
+      { val: 'd', text: 'Joint space' },
+    ]
+  },
+  {
+    id: 'q9',
+    text: 'Which of the following findings are *NOT* seen on this image of the '
+          + 'suprapatellar maximum flexion transverse view of the knee.',
+    multi: false,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q9.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Increased echogenicity of cartilage' },
+      { val: 'b', text: 'Loss of the superior surface contour of cartilage' },
+      { val: 'c', text: 'Femoral hyaline cartilage degeneration' },
+      { val: 'd', text: 'Knee effusion' },
+    ]
+  },
+  {
+    id: 'q10',
+    text: 'What is the most likely diagnosis based on these suprapatellar maximum-flexion '
+          + 'transverse images of the knees?',
+    multi: false,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q10.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Uric acid deposits (Gout)' },
+      { val: 'b', text: 'Chondrocalcinosis (CPPD)' },
+      { val: 'c', text: 'Foreign bodies' },
+      { val: 'd', text: 'Chondrocalcinosis on left and double contour sign on right' },
+    ]
+  },
+  {
+    id: 'q11',
+    text: 'A 40-year-old female with RA has inflammatory hand arthralgias without '
+          + 'clinical swelling. Which of the following is the most accurate interpretation '
+          + 'of the MCP ultrasound images?',
+    multi: false,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q11a.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q11b.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Synovitis; grade 2' },
+      { val: 'b', text: 'Synovitis; grade 3' },
+      { val: 'c', text: 'Synovitis & peritenonitis; grade 2' },
+      { val: 'd', text: 'Synovitis & tenosynovitis; grade 3' },
+    ]
+  },
+  {
+    id: 'q12',
+    text: 'A 36-year-old male has undifferentiated inflammatory arthritis affecting '
+          + 'multiple MCPs and PIPs. His serology is all negative. Ultrasound is performed '
+          + 'to help differentiate RA from peripheral SpA/PsA. Which of the following best '
+          + 'describes the findings?',
+    multi: false,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q12a.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q12b.jpg',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q12c.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q12d.jpg',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q12e.jpg',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Synovitis in keeping with RA' },
+      { val: 'b', text: 'Synovitis and extensor tenosynovitis in keeping with RA' },
+      { val: 'c', text: 'Synovitis and effusions in keeping with RA' },
+      { val: 'd', text: 'Peritenonitis in keeping with SpA/PsA' },
+      { val: 'e', text: 'Synovitis and peritenonitis in keeping with SpA/PsA' },
+    ]
+  },
+  {
+    id: 'q13',
+    text: 'You see a RA patient that you have difficulty differentiating active disease, '
+          + 'damage, and chronic pain. Which of the following findings are present on these '
+          + 'ultrasound images? Select all that apply.',
+    multi: true,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q13a.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q13b.jpg',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q13c.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q13d.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q13e.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Tenosynovitis' },
+      { val: 'b', text: 'Synovitis' },
+      { val: 'c', text: 'Erosion' },
+      { val: 'd', text: 'Peritenonitis' },
+      { val: 'e', text: 'Osteophytes' },
+      { val: 'f', text: 'Effusions' },
+      { val: 'g', text: 'Enthesophytes' },
+      { val: 'h', text: 'Tophi' },
+      { val: 'i', text: 'Artifact (anisotropy)' },
+    ]
+  },
+  {
+    id: 'q14',
+    text: 'A 65-year-old male has recurrent pain and swelling of the 1st MTP joint. Which '
+          + 'of the following is seen on ultrasound?',
+    multi: false,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q14.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Osteophyte' },
+      { val: 'b', text: 'Calcium pyrophosphate deposit' },
+      { val: 'c', text: 'Tophaceous deposit' },
+      { val: 'd', text: 'Interface sign' },
+    ]
+  },
+  {
+    id: 'q15',
+    text: 'A 60-year-old male with PMR has right shoulder pain. Which findings are '
+          + 'present on ultrasound of the supraspinatus? Select all that apply.',
+    multi: true,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q15.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Full thickness tear' },
+      { val: 'b', text: 'Retracted tendon' },
+      { val: 'c', text: 'Erosion' },
+      { val: 'd', text: 'Effusion' },
+      { val: 'e', text: 'Calcification' },
+      { val: 'f', text: 'Enthesopathy' },
+    ]
+  },
+  {
+    id: 'q16',
+    text: 'A patient with RA has numbness and tingling in a median nerve distribution '
+          + '(first 3 digits). Which of the following is seen on ultrasound of the volar '
+          + 'wrist?',
+    multi: false,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q16.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Median nerve enlargement' },
+      { val: 'b', text: 'Median nerve entrapment (bottleneck sign)' },
+      { val: 'c', text: 'Doppler signal and hyperemia around median nerve' },
+      { val: 'd', text: 'Tenosynovitis of flexor tendons' },
+      { val: 'e', text: 'Tenosynovitis of flexor tendons and effusions' },
+    ]
+  },
+  {
+    id: 'q17',
+    text: 'A 26-year-old male with axial spondyloarthritis (Ankylosing Spondylitis) '
+          + 'presents with Achilles pain and swelling. What is the most accurate '
+          + 'interpretation of the ultrasound images?',
+    multi: false,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q17a.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q17b.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q17c.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q17d.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Achilles tendinopathy' },
+      { val: 'b', text: 'Achilles enthesitis' },
+      { val: 'c', text: 'Achilles enthesopathy' },
+      { val: 'd', text: 'Achilles enthesopathy and tear' },
+      { val: 'e', text: 'Achilles tendonitis and retrocalcaneal bursitis' },
+    ]
+  },
+  {
+    id: 'q18',
+    text: 'Which three shoulder ultrasound pathologies were included in the EULAR/ACR '
+          + 'classification criteria for polymyalgia rheumatica (PMR)?',
+    multi: false,
+    media: [],
+    options: [
+      { val: 'a', text: 'Subdeltoid bursitis, biceps tenosynovitis, glenohumeral synovitis' },
+      { val: 'b', text: 'Subdeltoid bursitis, biceps tenosynovitis, supraspinatus tendinopathy/tendonitis' },
+      { val: 'c', text: 'Subdeltoid bursitis, supraspinatus tendinopathy, glenohumeral synovitis' },
+      { val: 'd', text: 'Biceps tenosynovitis, supraspinatus tendinopathy, glenohumeral synovitis' },
+    ]
+  },
+  {
+    id: 'q19',
+    text: 'A 32-year-old female with RA has a painless 10 degrees fixed flexion deformity '
+          + 'of the elbow without clinical swelling or tenderness. Which of the following '
+          + 'is the most accurate interpretation of the posterior elbow grey scale '
+          + 'ultrasound?',
+    multi: false,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q19a.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q19b.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q19c.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Normal' },
+      { val: 'b', text: 'Joint space narrowing and damage' },
+      { val: 'c', text: 'Elbow bursitis' },
+      { val: 'd', text: 'Synovitis and effusion' },
+      { val: 'e', text: 'Triceps enthesitis' },
+    ]
+  },
+  {
+    id: 'q20',
+    text: 'A 40-year-old female with psoriasis and knee pain has a normal knee joint on '
+          + 'ultrasound. Which findings are present at the patellar tendon insertion onto '
+          + 'the tibia? Select all that apply.',
+    multi: true,
+    media: [
+      { type: 'image', src: 'images/quiz01/Q20a.png',
+        caption: '' },
+      { type: 'image', src: 'images/quiz01/Q20b.png',
+        caption: '' },
+    ],
+    options: [
+      { val: 'a', text: 'Enthesophyte' },
+      { val: 'b', text: 'Calcification' },
+      { val: 'c', text: 'Erosions' },
+      { val: 'd', text: 'Thickening' },
+      { val: 'e', text: 'Hypoechogenicity' },
+      { val: 'f', text: 'Anisotropy' },
+    ]
+  }
+];
+
+
+/* ── SAFE STORAGE ───────────────────────────────────────────────────────────
+   localStorage can throw outright in a private window or with site data
+   blocked. An uncaught throw here would kill the rest of this script and leave
+   the page dead, so every access goes through these. */
+const store = {
+  get(k)    { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  remove(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+
+
+/* ── THE GATE ───────────────────────────────────────────────────────────────
+   The page is hidden until this runs. Anyone reaching this URL without a
+   participant session is sent to quizzes.html rather than shown the questions.
+   Guests are turned away regardless of ALLOW_GUEST_QUIZZES, because a guest has
+   no ID and nothing to record against. */
+let USER = null;
+
+// If rheumwave-config.js failed to load, the key name is missing. Fall back to
+// its literal value rather than throwing, which would leave the page blank.
+const UKEY = (typeof USER_KEY !== 'undefined') ? USER_KEY : 'rheumwave-user';
+
+(function gate() {
+  let u = null;
+  try { u = JSON.parse(store.get(UKEY) || 'null'); } catch (e) {}
+  if (!u || u.type !== 'participant' || !u.id) {
+    window.location.replace('../quizzes.html');
+    return;
+  }
+  USER = u;
+  document.body.classList.add('gate-passed');
+})();
+
+
+/* ── STATE ──────────────────────────────────────────────────────────────── */
+let attemptId  = null;      // from start_quiz_attempt()
+let responses  = {};        // { q1: ['b'], q2: ['a','c'] }
+let demoResponses = {};     // { d1: ['a'], … } — stored, never marked
+let submitting = false;
+let finished   = false;
+
+// The countdown. deadline is a moment on THIS device's clock, worked out once
+// from the seconds the server said were left. Everything after that is
+// "deadline minus now", never a running subtraction — see tick().
+let deadline   = null;      // ms timestamp, or null when the quiz is untimed
+let timerHandle = null;
+
+// The time limit as the server reports it. Nothing in this page hard-codes a
+// number of minutes: change quiz_settings.time_limit_seconds in Supabase and
+// every sentence here follows, so the page can never contradict the clock.
+let limitSeconds = null;
+
+function minutesLabel() {
+  return limitSeconds ? `${Math.round(limitSeconds / 60)} minutes` : 'time';
+}
+
+// Fills every <span class="mins-label"> with the real figure.
+function paintMinutesLabels() {
+  document.querySelectorAll('.mins-label')
+    .forEach(el => { el.textContent = minutesLabel(); });
+}
+
+function saveState() {
+  store.set(QUIZ_STATE_KEY, JSON.stringify({
+    participant: USER.id, attemptId, responses, demographics: demoResponses
+  }));
+}
+
+function loadState() {
+  try {
+    const s = JSON.parse(store.get(QUIZ_STATE_KEY) || 'null');
+    // belt and braces: never restore one participant's answers for another
+    if (!s || s.participant !== USER.id) return null;
+    return s;
+  } catch (e) { return null; }
+}
+
+
+/* ── SUPABASE ───────────────────────────────────────────────────────────────
+   Two calls, both to security-definer functions. Note that fetch resolves on a
+   400 or 403 — a blocked policy comes back as an ordinary response — so res.ok
+   has to be checked explicitly or a failure passes as a success. */
+async function rpc(fn, args) {
+  let res;
+  try {
+    res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(args)
+    });
+  } catch (e) {
+    const err = new Error('network'); err.reason = 'network'; throw err;
+  }
+  let body = null;
+  try { body = await res.json(); } catch (e) {}
+  if (!res.ok) {
+    const msg = String((body && (body.message || body.hint || body.details)) || '');
+    const err = new Error(msg || `status ${res.status}`);
+    err.reason =
+      msg.includes('already_submitted')   ? 'already_submitted'   :
+      msg.includes('unknown_participant') ? 'unknown_participant' :
+      msg.includes('unknown_quiz')        ? 'unknown_quiz'        :
+      msg.includes('no_open_attempt')     ? 'no_open_attempt'     :
+      res.status === 404                  ? 'missing_function'    : 'server';
+    throw err;
+  }
+  return body;
+}
+
+
+/* ── STAGES ─────────────────────────────────────────────────────────────── */
+function showStage(id) {
+  ['stageIntro', 'stageDemographics', 'stageQuiz', 'stageDone', 'stageBlocked']
+    .forEach(s => document.getElementById(s).classList.toggle('active', s === id));
+  document.body.classList.toggle('in-progress', id === 'stageQuiz' && deadline !== null);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function blockPage(title, body) {
+  stopTimer();
+  finished = true;
+  document.getElementById('blockedTitle').textContent = title;
+  document.getElementById('blockedBody').textContent = body;
+  showStage('stageBlocked');
+}
+
+function noticeHTML(text, kind) {
+  return `<div class="notice ${kind === 'warn' ? 'warn' : 'err'}">${text}</div>`;
+}
+
+
+/* ── STARTING ───────────────────────────────────────────────────────────── */
+async function startQuiz() {
+  const btn = document.getElementById('startBtn');
+  btn.disabled = true; btn.textContent = 'Starting…';
+  document.getElementById('introNotice').innerHTML = '';
+
+  let open;
+  try {
+    open = await rpc('start_quiz_attempt', {
+      p_participant_id: USER.id,
+      p_quiz_id: QUIZ_ID
+    });
+  } catch (e) {
+    btn.disabled = false; btn.textContent = 'Start Quiz';
+    if (e.reason === 'already_submitted') {
+      blockPage('You have already sat this quiz',
+        'Your answers were recorded the first time and the quiz cannot be taken again. ' +
+        'If something went wrong during your attempt, contact the study coordinator.');
+      return;
+    }
+    document.getElementById('introNotice').innerHTML = noticeHTML(
+      e.reason === 'network'
+        ? 'No connection. This quiz has to be marked online, so please reconnect before starting.'
+      : e.reason === 'unknown_participant'
+        ? 'That participant ID was not recognised. Please sign in again from the quizzes page.'
+      : e.reason === 'missing_function' || e.reason === 'unknown_quiz'
+        ? 'This quiz is not set up on the server yet. Please tell the study coordinator.'
+        : 'Something went wrong starting the quiz. Please try again in a moment.',
+      e.reason === 'network' ? 'warn' : 'err');
+    return;
+  }
+
+  attemptId = open.attempt_id;
+
+  const saved = loadState();
+  responses = (saved && saved.attemptId === attemptId && saved.responses) || {};
+  demoResponses = (saved && saved.attemptId === attemptId && saved.demographics) || {};
+  saveState();
+
+  // seconds_remaining is null until the clock has been started, which happens
+  // when they leave the demographics. So a null here means one of two things,
+  // told apart by timed_started_at: either the quiz is untimed, or they have
+  // not reached the scored questions yet.
+  const started = !!open.timed_started_at;
+  if (!started) {
+    renderDemographics();
+    showStage('stageDemographics');
+    return;
+  }
+
+  applyRemaining(open);
+  renderAll();
+  showStage('stageQuiz');
+  if (deadline !== null) {
+    if (remainingMs() <= 0) { autoSubmit(); return; }   // resumed after time ran out
+    startTimer();
+  }
+}
+
+// Works out the local deadline from whatever the server said is left.
+function applyRemaining(res) {
+  if (res.seconds_remaining === null || res.seconds_remaining === undefined) {
+    deadline = null;                       // untimed
+  } else {
+    deadline = Date.now() + Number(res.seconds_remaining) * 1000;
+  }
+  if (res.time_limit_seconds) {
+    limitSeconds = Number(res.time_limit_seconds);
+    window.__quizTotalMs = limitSeconds * 1000;
+    paintMinutesLabels();
+  }
+}
+
+
+/* ── LEAVING THE DEMOGRAPHICS, WHICH STARTS THE CLOCK ───────────────────── */
+async function beginTimedSection() {
+  const missing = DEMOGRAPHIC_ITEMS.length - demoAnsweredCount();
+  if (missing) {
+    document.getElementById('demoNotice').innerHTML = noticeHTML(
+      `Please answer all 7 questions before continuing. ${missing} still to go.`, 'warn');
+    return;
+  }
+
+  const btn = document.getElementById('demoContinueBtn');
+  btn.disabled = true; btn.textContent = 'Starting…';
+  document.getElementById('demoNotice').innerHTML = '';
+
+  let res;
+  try {
+    res = await rpc('begin_quiz_section', {
+      p_attempt_id: attemptId,
+      p_demographics: demoResponses
+    });
+  } catch (e) {
+    btn.disabled = false; btn.textContent = 'Continue to the quiz — starts the clock';
+    document.getElementById('demoNotice').innerHTML = noticeHTML(
+      e.reason === 'network'
+        ? 'No connection. This quiz has to be marked online, so please reconnect before continuing.'
+        : 'Something went wrong. Please try again in a moment.', 'warn');
+    return;
+  }
+
+  applyRemaining(res);
+  renderAll();
+  showStage('stageQuiz');
+  if (deadline !== null) {
+    if (remainingMs() <= 0) { autoSubmit(); return; }
+    startTimer();
+  }
+}
+
+
+/* ── THE COUNTDOWN ──────────────────────────────────────────────────────────
+   Every tick recomputes "deadline minus now" rather than subtracting a second
+   from a running total. That matters for two reasons: browsers slow timers down
+   in a background tab, so a running total drifts behind; and it means the
+   display is correct the instant the tab comes back to the front. */
+function remainingMs() { return deadline === null ? Infinity : deadline - Date.now(); }
+
+function startTimer() {
+  stopTimer();
+  tick();
+  timerHandle = setInterval(tick, 1000);
+  // A phone that sleeps stops firing the interval; this re-reads the clock the
+  // moment the participant comes back.
+  document.addEventListener('visibilitychange', tick);
+}
+
+function stopTimer() {
+  if (timerHandle) { clearInterval(timerHandle); timerHandle = null; }
+  document.removeEventListener('visibilitychange', tick);
+}
+
+function tick() {
+  if (deadline === null || finished) return;
+  const left = Math.max(0, remainingMs());
+  const secs = Math.ceil(left / 1000);
+  const mm = Math.floor(secs / 60), ss = secs % 60;
+
+  const clock = document.getElementById('timerClock');
+  const fill  = document.getElementById('timerFill');
+  document.getElementById('timerText').textContent =
+    `${mm}:${String(ss).padStart(2, '0')} left`;
+
+  const urgent = secs <= 60, warn = secs <= 300;
+  clock.classList.toggle('urgent', urgent);
+  clock.classList.toggle('warn', warn && !urgent);
+  fill.classList.toggle('urgent', urgent);
+  fill.classList.toggle('warn', warn && !urgent);
+
+  if (window.__quizTotalMs) {
+    fill.style.width = `${Math.max(0, Math.min(100, (left / window.__quizTotalMs) * 100))}%`;
+  }
+
+  if (left <= 0) autoSubmit();
+}
+
+async function autoSubmit() {
+  if (submitting || finished) return;
+  stopTimer();
+  document.getElementById('submitNotice').innerHTML =
+    noticeHTML('Time is up. Your answers are being submitted.', 'warn');
+  await submitQuiz({ auto: true });
+}
+
+
+/* ── DRAWING THE DEMOGRAPHICS ───────────────────────────────────────────────
+   Same components as the quiz, so the two sections feel like one page. They
+   are kept in their own list and their own answer object, which is what stops
+   a demographic answer ever reaching the marking. */
+function renderDemographics() {
+  document.getElementById('demoBody').innerHTML = DEMOGRAPHIC_ITEMS.map((item, i) => {
+    const options = item.options.map(o => `
+      <div class="option" data-q="${escapeAttr(item.id)}" data-val="${escapeAttr(o.val)}"
+           role="button" tabindex="0" aria-pressed="false">
+        <div class="option-marker"></div>
+        <span class="option-text">${escapeHTML(o.text)}</span>
+      </div>`).join('');
+    return `
+      <div class="question-block" id="block-${escapeAttr(item.id)}">
+        <div class="q-header">
+          <span class="q-num">${i + 1}</span>
+          <span class="q-text">${escapeHTML(item.text)}</span>
+        </div>
+        <div class="options">${options}</div>
+      </div>`;
+  }).join('');
+
+  const body = document.getElementById('demoBody');
+  body.addEventListener('click', onDemoClick);
+  body.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.closest('.option')) {
+      e.preventDefault(); onDemoClick(e);
+    }
+  });
+  paintDemographics();
+  updateDemoCount();
+}
+
+function onDemoClick(e) {
+  const opt = e.target.closest('.option');
+  if (!opt) return;
+  const item = DEMOGRAPHIC_ITEMS.find(i => i.id === opt.dataset.q);
+  if (!item) return;
+  const val = opt.dataset.val;
+  const cur = demoResponses[item.id] || [];
+  if (item.multi) {
+    demoResponses[item.id] = cur.includes(val) ? cur.filter(v => v !== val) : cur.concat(val);
+    if (!demoResponses[item.id].length) delete demoResponses[item.id];
+  } else {
+    demoResponses[item.id] = [val];
+  }
+  saveState();
+  paintDemographics();
+  updateDemoCount();
+}
+
+function paintDemographics() {
+  document.querySelectorAll('#demoBody .option').forEach(o => {
+    const on = (demoResponses[o.dataset.q] || []).includes(o.dataset.val);
+    o.classList.toggle('selected', on);
+    o.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+
+function demoAnsweredCount() {
+  return DEMOGRAPHIC_ITEMS.filter(i => (demoResponses[i.id] || []).length).length;
+}
+
+function updateDemoCount() {
+  const done = demoAnsweredCount(), total = DEMOGRAPHIC_ITEMS.length;
+  document.getElementById('demoLead').textContent = done === total
+    ? `All answered. Continuing will start your ${minutesLabel()}.`
+    : `${done} of ${total} answered. Answer all ${total} to continue.`;
+}
+
+
+/* ── DRAWING THE QUESTIONS ──────────────────────────────────────────────────
+   Everything is written once, in page order, and only the selected class
+   changes afterward. The markup deliberately mirrors a case page's, so the
+   case stylesheet does all the work. */
+function renderAll() {
+  document.getElementById('quizHeading').textContent = QUIZ_TITLE;
+
+  if (QUIZ_VIGNETTE) {
+    const v = document.getElementById('quizVignette');
+    v.innerHTML = QUIZ_VIGNETTE;            // authored by you, not by a participant
+    v.style.display = '';
+  }
+
+  document.getElementById('quizBody').innerHTML = QUIZ_ITEMS.map((item, i) => {
+    const n = i + 1;
+
+    const media = (item.media || []).map((m, mi) => {
+      // A caption is optional. Until one is written the image simply carries a
+      // neutral description — nothing reading "TODO" is ever shown to a
+      // participant. Write the caption and it appears under the image and in
+      // the zoom view, exactly as a case does.
+      //
+      // Where a question has more than one image they are lettered a, b, c…,
+      // matching how the source document names them (Q4a–d). That gives a
+      // participant something to refer to, and stops "this image" being
+      // ambiguous when four of them sit side by side.
+      const many  = (item.media || []).length > 1;
+      const label = many ? `${n}${String.fromCharCode(97 + mi)}` : String(n);
+      const cap   = escapeHTML(m.caption || '');
+      const alt   = m.caption
+        ? `Image ${label}. ${m.caption}`
+        : `Ultrasound image ${label} for question ${n}`;
+      const tag = m.type === 'video'
+        ? `<video class="us-clip" src="${escapeAttr(m.src)}" muted loop playsinline autoplay
+                  data-caption="${escapeAttr(m.caption ? `${label} — ${m.caption}` : label)}"
+                  onerror="showImageSlot(this)"></video>`
+        : `<img class="us-thumb" src="${escapeAttr(m.src)}" alt="${escapeAttr(alt)}"
+                data-caption="${escapeAttr(m.caption ? `${label} — ${m.caption}` : label)}"
+                onerror="showImageSlot(this)">`;
+      return `<figure class="us-figure">${tag}` +
+             `<figcaption><span class="img-label">${escapeHTML(label)}</span>` +
+             `${cap ? ' ' + cap : ''}</figcaption></figure>`;
+    }).join('');
+
+    const solo = (item.media || []).length === 1 ? ' solo' : ' uniform';
+
+    const mediaPanel = media
+      ? `<div class="q-media-inline">
+           ${item.heading ? `<h4>${escapeHTML(item.heading)}</h4>` : ''}
+           <div class="image-grid${solo}">${media}</div>
+         </div>`
+      : '';
+
+    const options = item.options.map(o => `
+      <div class="option${item.multi ? ' multi' : ''}"
+           data-q="${escapeAttr(item.id)}" data-val="${escapeAttr(o.val)}"
+           role="button" tabindex="0" aria-pressed="false">
+        <div class="option-marker"></div>
+        <span class="option-text">${escapeHTML(o.text)}</span>
+      </div>`).join('');
+
+    return `
+      <div class="question-block" id="block-${escapeAttr(item.id)}">
+        ${item.info ? `<div class="new-info"><span class="ni-label">New Information</span><p>${item.info}</p></div>` : ''}
+        <div class="q-header">
+          <span class="q-num">Q${n}</span>
+          <span class="q-text">${emphasise(escapeHTML(item.text))}</span>
+        </div>
+        ${item.multi ? '<p class="q-instruction">Select all that apply.</p>' : ''}
+        ${mediaPanel}
+        <div class="options">${options}</div>
+        <p class="q-flag">Not yet answered.</p>
+      </div>`;
+  }).join('');
+
+  // One listener for the whole page rather than an onclick on every option.
+  const body = document.getElementById('quizBody');
+  body.addEventListener('click', onBodyClick);
+  body.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const opt = e.target.closest('.option');
+      if (opt) { e.preventDefault(); onBodyClick(e); }
+    }
+  });
+
+  paintSelections();
+  updateAnswered();
+}
+
+function onBodyClick(e) {
+  const media = e.target.closest('.us-thumb, .us-clip');
+  if (media) { openLightbox(media); return; }
+
+  const opt = e.target.closest('.option');
+  if (!opt || finished) return;
+  choose(opt.dataset.q, opt.dataset.val);
+}
+
+function choose(qid, val) {
+  const item = QUIZ_ITEMS.find(i => i.id === qid);
+  if (!item) return;
+  const cur = responses[qid] || [];
+  if (item.multi) {
+    responses[qid] = cur.includes(val) ? cur.filter(v => v !== val) : cur.concat(val);
+    if (!responses[qid].length) delete responses[qid];
+  } else {
+    responses[qid] = [val];
+  }
+  saveState();
+  paintSelections();
+  updateAnswered();
+}
+
+function paintSelections() {
+  document.querySelectorAll('#quizBody .option').forEach(o => {
+    const on = (responses[o.dataset.q] || []).includes(o.dataset.val);
+    o.classList.toggle('selected', on);
+    o.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+
+function answeredCount() {
+  return QUIZ_ITEMS.filter(i => (responses[i.id] || []).length).length;
+}
+
+function updateAnswered() {
+  const done = answeredCount(), total = QUIZ_ITEMS.length;
+  document.getElementById('timerAnswered').textContent = `${done} of ${total} answered`;
+  const missing = total - done;
+  document.getElementById('submitLead').textContent = missing
+    ? `${missing} question${missing === 1 ? '' : 's'} still unanswered. Unanswered questions are marked as incorrect.`
+    : 'All questions answered. Check you are happy with them before submitting.';
+}
+
+
+/* ── SUBMITTING ─────────────────────────────────────────────────────────── */
+async function submitQuiz(opts = {}) {
+  if (submitting || finished) return;
+  const auto = opts.auto === true;
+
+  // Only ask when the participant pressed the button themselves. Time running
+  // out must not sit waiting behind a dialog nobody is there to answer.
+  if (!auto) {
+    const missing = QUIZ_ITEMS.length - answeredCount();
+    const warn = missing
+      ? `${missing} question${missing === 1 ? ' is' : 's are'} unanswered and will be marked incorrect.\n\n`
+      : '';
+    if (!confirm(`${warn}Submit your answers? You will not be able to change them or take this quiz again.`)) return;
+  }
+
+  // The moment they finished, recorded now rather than when this reaches the
+  // server — the two are the same for a live submission and can be far apart
+  // for one that waits in the outbox.
+  const parcel = {
+    participant: USER.id,
+    attemptId,
+    responses,
+    auto,
+    finishedAt: new Date().toISOString()
+  };
+
+  submitting = true;
+  stopTimer();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  if (!auto) document.getElementById('submitNotice').innerHTML = '';
+
+  const sent = await deliver(parcel);
+  submitting = false;
+
+  if (sent.ok) { finishUp(sent.result); return; }
+
+  if (sent.reason === 'no_open_attempt') {
+    clearOutbox();
+    blockPage('This attempt is already closed',
+      'Your answers were recorded. If you believe that is wrong, contact the study coordinator.');
+    return;
+  }
+
+  // Could not be sent. Park it in the outbox and keep trying: the answers are
+  // safe, and they will go up by themselves once there is a connection, even
+  // if this page is closed and reopened later.
+  saveOutbox(parcel);
+  btn.disabled = false; btn.textContent = 'Try again now';
+  document.getElementById('submitNotice').innerHTML = noticeHTML(
+    '<strong>Your answers are saved but have not reached us yet.</strong> ' +
+    'The connection dropped. They are stored on this device and will be sent ' +
+    'automatically as soon as you are back online — you can also press the button ' +
+    'to try again. Please do not clear your browsing data, and reopen this page ' +
+    'once you have a connection.', 'warn');
+  startRetryLoop();
+}
+
+// One place that actually talks to the server, used by both a live submit and
+// the outbox. Returns {ok} rather than throwing, so callers stay simple.
+async function deliver(parcel) {
+  try {
+    const result = await rpc('submit_quiz', {
+      p_attempt_id: parcel.attemptId,
+      p_responses: parcel.responses,
+      p_auto_submitted: parcel.auto,
+      p_client_finished_at: parcel.finishedAt
+    });
+    return { ok: true, result };
+  } catch (e) {
+    return { ok: false, reason: e.reason };
+  }
+}
+
+function finishUp(result) {
+  finished = true;
+  stopTimer();
+  clearOutbox();
+  store.remove(QUIZ_STATE_KEY);        // the sitting is over
+  document.body.classList.remove('in-progress');
+
+  if (result && result.timed_out) {
+    document.getElementById('doneNotice').innerHTML =
+      noticeHTML('Your time ran out, so the answers you had given were submitted for you.', 'warn');
+  }
+
+  if (SHOW_SCORE_ON_SUBMIT && result && result.score_pct !== null && result.score_pct !== undefined) {
+    document.getElementById('scoreBlock').style.display = '';
+    document.getElementById('scoreBig').textContent = `${Math.round(result.score_pct)}%`;
+    document.getElementById('scoreSub').textContent =
+      `${result.items_correct} of ${result.items_total} correct`;
+  }
+  showStage('stageDone');
+}
+
+
+/* ── THE OUTBOX ─────────────────────────────────────────────────────────────
+   A finished submission that could not be sent waits here. This is what makes
+   a dropped connection survivable without ever putting the answer key in the
+   page: what is held on the device is the participant's ANSWERS, not a score.
+   The marking still happens in Supabase, whenever the submission arrives.
+
+   It is separate from RWSync's queue in rheumwave-sync.js, which only knows
+   how to POST a finished score to case_scores — the wrong shape entirely for
+   a quiz that is marked server-side. */
+function saveOutbox(parcel) {
+  store.set(QUIZ_OUTBOX_KEY, JSON.stringify(parcel));
+}
+
+function readOutbox() {
+  try {
+    const p = JSON.parse(store.get(QUIZ_OUTBOX_KEY) || 'null');
+    // never send one participant's answers under another's session
+    if (!p || p.participant !== USER.id) return null;
+    return p;
+  } catch (e) { return null; }
+}
+
+function clearOutbox() { store.remove(QUIZ_OUTBOX_KEY); }
+
+// Try to send whatever is waiting. Returns true if the outbox is now empty.
+async function flushOutbox() {
+  const parcel = readOutbox();
+  if (!parcel || finished) return true;
+
+  const sent = await deliver(parcel);
+  if (sent.ok) { finishUp(sent.result); return true; }
+
+  // The attempt is already closed, so an earlier send did land after all.
+  if (sent.reason === 'no_open_attempt') {
+    clearOutbox();
+    store.remove(QUIZ_STATE_KEY);
+    finished = true;
+    blockPage('Already submitted',
+      'Your answers reached us. There is nothing more to do.');
+    return true;
+  }
+  return false;                        // still no connection; leave it waiting
+}
+
+// Keeps trying in the background. There may be nobody at the keyboard — the
+// timer may have submitted for them — so this cannot rely on a button press.
+let retryHandle = null;
+function startRetryLoop() {
+  if (retryHandle) return;
+  retryHandle = setInterval(async () => {
+    if (finished) { clearInterval(retryHandle); retryHandle = null; return; }
+    if (await flushOutbox()) { clearInterval(retryHandle); retryHandle = null; }
+  }, 15000);
+  window.addEventListener('online', () => flushOutbox());
+}
+
+
+/* ── A MISSING IMAGE ────────────────────────────────────────────────────────
+   Until the ultrasound files are added, and if one ever fails to load later,
+   the image is replaced by the dashed placeholder box the cases already use
+   (.image-slot in rheumwave-case.css) rather than a broken-image icon.
+
+   The label names the file that is expected. Those names are opaque by
+   convention — Q4b.jpg says nothing about the finding — so it is safe for a
+   participant to see, and it tells you exactly what is missing while you build. */
+function showImageSlot(el) {
+  if (!el || el.dataset.slotted) return;
+  el.dataset.slotted = '1';
+  const file = (el.getAttribute('src') || '').split('/').pop() || 'image';
+  const slot = document.createElement('div');
+  slot.className = 'image-slot';
+  slot.innerHTML =
+    '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.5" aria-hidden="true">' +
+    '<rect x="3" y="4" width="18" height="16" rx="2"/>' +
+    '<circle cx="8.5" cy="9.5" r="1.5"/><path d="m21 15-5-5L5 20"/></svg>' +
+    `<span>Image not available<br>${escapeHTML(file)}</span>`;
+  el.replaceWith(slot);
+}
+
+
+/* ── LIGHTBOX ───────────────────────────────────────────────────────────────
+   Same behaviour as a case page: a still opens full size, a clip opens with
+   controls so it can be scrubbed and paused.
+
+   It also steps between the images of THAT question — Q12 and Q13 have five
+   each, and comparing them by closing and reopening one at a time is a lot of
+   clicking against a 25-minute clock. The arrows never leave the question they
+   were opened from, so they cannot be mistaken for moving between questions. */
+let lbGroup = [];      // the images of the question currently open
+let lbIndex = 0;
+
+function ensureLightboxVideo() {
+  let vid = document.getElementById('usLightboxVideo');
+  if (vid) return vid;
+  vid = document.createElement('video');
+  vid.id = 'usLightboxVideo';
+  ['controls', 'loop', 'muted', 'playsinline'].forEach(a => vid.setAttribute(a, ''));
+  vid.muted = true;
+  const box = document.getElementById('usLightbox');
+  box.insertBefore(vid, document.getElementById('usLightboxCaption'));
+  return vid;
+}
+
+function openLightbox(el) {
+  // everything still loadable in this question's panel, in page order
+  const panel = el.closest('.q-media-inline');
+  lbGroup = panel ? [...panel.querySelectorAll('.us-thumb, .us-clip')] : [el];
+  lbIndex = Math.max(0, lbGroup.indexOf(el));
+
+  showLightboxAt(lbIndex);
+  document.getElementById('usLightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function showLightboxAt(i) {
+  const el   = lbGroup[i];
+  if (!el) return;
+  const box  = document.getElementById('usLightbox');
+  const img  = document.getElementById('usLightboxImg');
+  const text = el.dataset.caption || el.getAttribute('alt') || '';
+
+  if (el.tagName === 'VIDEO') {
+    const vid = ensureLightboxVideo();
+    vid.src = el.currentSrc || el.src;
+    vid.style.display = '';
+    img.style.display = 'none';
+    vid.play().catch(() => {});          // a blocked autoplay is not an error
+  } else {
+    const vid = document.getElementById('usLightboxVideo');
+    if (vid) { vid.pause(); vid.removeAttribute('src'); vid.load(); vid.style.display = 'none'; }
+    img.style.display = '';
+    img.src = el.currentSrc || el.src;
+    img.alt = el.getAttribute('alt') || '';
+  }
+
+  const many = lbGroup.length > 1;
+  document.getElementById('usLightboxCaption').textContent =
+    many ? `${text}${text ? ' — ' : ''}${i + 1} of ${lbGroup.length}` : text;
+  box.classList.toggle('has-nav', many);
+}
+
+function lightboxStep(delta, e) {
+  if (e) e.stopPropagation();            // the backdrop closes; the arrows must not
+  if (lbGroup.length < 2) return;
+  lbIndex = (lbIndex + delta + lbGroup.length) % lbGroup.length;
+  showLightboxAt(lbIndex);
+}
+
+function closeLightbox(e) {
+  // clicking the enlarged media itself should not close it; the backdrop does
+  if (e && e.target && (e.target.id === 'usLightboxImg' || e.target.id === 'usLightboxVideo')) return;
+  const vid = document.getElementById('usLightboxVideo');
+  if (vid) vid.pause();
+  document.getElementById('usLightbox').classList.remove('open');
+  document.body.style.overflow = '';
+  lbGroup = [];
+}
+
+document.addEventListener('keydown', e => {
+  const open = document.getElementById('usLightbox').classList.contains('open');
+  if (!open) return;
+  if (e.key === 'Escape')     { closeLightbox(); return; }
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); lightboxStep(-1); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); lightboxStep(1); }
+});
+
+
+/* ── SMALL HELPERS ──────────────────────────────────────────────────────── */
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function escapeAttr(s) { return escapeHTML(s); }
+
+// reachable from the inline onerror= on each image
+window.showImageSlot = showImageSlot;
+
+// Limited emphasis inside a question stem: *like this* becomes bold. Applied
+// AFTER escaping, so a stem still cannot inject markup — it only ever produces
+// <strong>. Used for the NOT in Q9, which is easy to miss under time pressure
+// and is underlined in the source document for the same reason.
+function emphasise(escaped) {
+  return escaped.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+}
+
+
+/* ── INIT ───────────────────────────────────────────────────────────────── */
+document.getElementById('introTitle').textContent = QUIZ_TITLE;
+document.title = QUIZ_TITLE + ' | RheumWave';
+
+// What the intro says about time is read from the server, not typed here, so
+// the page and the real limit can never disagree.
+//
+// This uses quiz_info(), which is READ-ONLY. It must never call
+// start_quiz_attempt(): that creates the attempt row and starts the countdown,
+// so merely opening the page would burn a participant's time before they had
+// pressed anything.
+(async function describeQuiz() {
+  // Anything left in the outbox goes first. Somebody whose connection dropped
+  // at the end may simply reopen this page later, and that alone should be
+  // enough to get their answers in.
+  if (readOutbox()) {
+    document.getElementById('introNotice').innerHTML = noticeHTML(
+      'Sending answers you finished earlier…', 'warn');
+    document.getElementById('startBtn').disabled = true;
+    if (await flushOutbox()) return;      // landed, or the attempt was closed
+    document.getElementById('introNotice').innerHTML = noticeHTML(
+      '<strong>You have answers waiting to be sent.</strong> They are safe on this ' +
+      'device, but there is still no connection. Please reopen this page once you ' +
+      'are back online — they will go up automatically.', 'warn');
+    startRetryLoop();
+    return;
+  }
+
+  let info;
+  try {
+    info = await rpc('quiz_info', { p_participant_id: USER.id, p_quiz_id: QUIZ_ID });
+  } catch (e) {
+    // Not fatal — the intro simply stays general and Start reports any real
+    // problem. A missing function means the SQL has not been run yet.
+    if (e.reason === 'missing_function') {
+      document.getElementById('introNotice').innerHTML = noticeHTML(
+        'This quiz is not set up on the server yet. Please tell the study coordinator.', 'err');
+      document.getElementById('startBtn').disabled = true;
+    }
+    return;
+  }
+
+  if (info.status === 'submitted') {
+    blockPage('You have already sat this quiz',
+      'Your answers were recorded the first time and the quiz cannot be taken again. ' +
+      'If something went wrong during your attempt, contact the study coordinator.');
+    return;
+  }
+
+  const line  = document.getElementById('introTimeLine');
+  const limit = info.time_limit_seconds;
+
+  if (limit) {
+    limitSeconds = Number(limit);
+    window.__quizTotalMs = limitSeconds * 1000;   // the full window, for the bar
+    paintMinutesLabels();
+    const mins = Math.round(limit / 60);
+    line.innerHTML = `You have <strong>${mins} minutes</strong> for the 20 questions. ` +
+      'The countdown starts when you leave the questions about yourself, and keeps running ' +
+      'even if you close the page. When it reaches zero, whatever you have answered is ' +
+      'submitted for you.';
+  } else {
+    line.textContent = 'This quiz is not timed.';
+  }
+
+  // Coming back after starting the demographics but before the clock began.
+  if (info.status === 'in_demographics') {
+    document.getElementById('startBtn').textContent = 'Resume';
+    document.getElementById('introNotice').innerHTML = noticeHTML(
+      'You have already started. Your answers to the questions about yourself are still ' +
+      'there, and your time has not begun.', 'warn');
+    return;
+  }
+
+  // Coming back to an attempt that is already open and already counting.
+  if (info.status === 'in_progress') {
+    const btn = document.getElementById('startBtn');
+    btn.textContent = 'Resume Quiz';
+    const left = info.seconds_remaining;
+    if (limit && left !== null && left !== undefined) {
+      document.getElementById('introNotice').innerHTML = left > 0
+        ? noticeHTML(`You have a sitting already in progress, with about ` +
+            `<strong>${Math.max(1, Math.round(left / 60))} minute(s)</strong> left. ` +
+            'Your earlier answers are still there.', 'warn')
+        : noticeHTML('Your time has already run out. Press Resume to submit the answers you gave.', 'warn');
+    }
+  }
+})();
+
+// Warn before a mid-quiz close, since nothing is recorded until submit.
+window.addEventListener('beforeunload', e => {
+  if (document.getElementById('stageQuiz').classList.contains('active') && !finished) {
+    e.preventDefault(); e.returnValue = '';
+  }
+});
+</script>
+</body>
+</html>
