@@ -1118,7 +1118,7 @@ async function startQuiz() {
     if (e.reason === 'already_submitted') {
       blockPage('You have already sat this quiz',
         'Your answers were recorded the first time and the quiz cannot be taken again. ' +
-        'If something went wrong during your attempt, contact the study coordinator.');
+        'If something went wrong during your attempt, please contact Dr. Sahil Koppikar (sahil.koppikar@wchospital.ca).');
       return;
     }
     document.getElementById('introNotice').innerHTML = noticeHTML(
@@ -1127,7 +1127,7 @@ async function startQuiz() {
       : e.reason === 'unknown_participant'
         ? 'That participant ID was not recognised. Please sign in again from the quizzes page.'
       : e.reason === 'missing_function' || e.reason === 'unknown_quiz'
-        ? 'This quiz is not set up on the server yet. Please tell the study coordinator.'
+        ? 'This quiz is not set up on the server yet. Please tell Dr. Sahil Koppikar (sahil.koppikar@wchospital.ca).'
         : 'Something went wrong starting the quiz. Please try again in a moment.',
       e.reason === 'network' ? 'warn' : 'err');
     return;
@@ -1513,7 +1513,7 @@ async function submitQuiz(opts = {}) {
   if (sent.reason === 'no_open_attempt') {
     clearOutbox();
     blockPage('This attempt is already closed',
-      'Your answers were recorded. If you believe that is wrong, contact the study coordinator.');
+      'Your answers were recorded. If you believe that is wrong, please contact Dr. Sahil Koppikar (sahil.koppikar@wchospital.ca).');
     return;
   }
 
@@ -1803,7 +1803,7 @@ document.title = QUIZ_TITLE + ' | RheumWave';
     // problem. A missing function means the SQL has not been run yet.
     if (e.reason === 'missing_function') {
       document.getElementById('introNotice').innerHTML = noticeHTML(
-        'This quiz is not set up on the server yet. Please tell the study coordinator.', 'err');
+        'This quiz is not set up on the server yet. Please tell Dr. Sahil Koppikar (sahil.koppikar@wchospital.ca).', 'err');
       document.getElementById('startBtn').disabled = true;
     }
     return;
@@ -1812,7 +1812,7 @@ document.title = QUIZ_TITLE + ' | RheumWave';
   if (info.status === 'submitted') {
     blockPage('You have already sat this quiz',
       'Your answers were recorded the first time and the quiz cannot be taken again. ' +
-      'If something went wrong during your attempt, contact the study coordinator.');
+      'If something went wrong during your attempt, please contact Dr. Sahil Koppikar (sahil.koppikar@wchospital.ca).');
     return;
   }
 
